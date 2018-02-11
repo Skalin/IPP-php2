@@ -54,7 +54,7 @@
 			if ($argc != 1) {
 				for ($i = 1; $i < $argc; $i++) {
 					echo "Curr. arg i: ".$i."\nCurr. arg: ".$argv[$i]."\n";
-					if ($argv[$i] == "--help" && $this->arguments["hF"] != true) {
+					if (preg_match("/--help/", $argv[$i]) == 1 && $this->arguments["hF"] != true) {
 						$this->arguments["hF"] = true;
 					} else if (preg_match("/--stats=.*/", $argv[$i]) == 1) {
 						$this->arguments["sF"] = true;
@@ -93,7 +93,12 @@
 	$parsedRows = explode("\n", $input);
 	array_pop($parsedRows);
 
-	var_dump($parsedRows);
+	foreach ($parsedRows as $rows) {
+		foreach ($rows as $row) {
+
+		}
+	}
+
 
 	exit(0);
 
