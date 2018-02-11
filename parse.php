@@ -75,6 +75,17 @@
 			}
 			echo "Stats: ".$this->statsFile."\n";
 		}
+
+		private function convertStringLiterals($string) {
+			str_replace("<", "&lt;", $string);
+			str_replace(">", "&gt;", $string);
+			str_replace("&", "&amp;", $string);
+		}
+
+		public function generateXml() {
+			$string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		}
+
 	}
 
 
