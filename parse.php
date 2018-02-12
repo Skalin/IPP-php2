@@ -82,7 +82,7 @@
 			str_replace("&", "&amp;", $string);
 		}
 
-		public function generateXml() {
+		public function generateXml($arrayOfTokens) {
 			$prestring = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 			$prestring = $prestring."<program language=\"IPPcode18\">\n";
 
