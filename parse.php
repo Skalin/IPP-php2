@@ -83,7 +83,10 @@
 		}
 
 		public function generateXml() {
-			$string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			$prestring = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+			$prestring = $prestring."<program language=\"IPPcode18\">\n";
+
+			$poststring = "</program>";
 		}
 
 	}
