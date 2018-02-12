@@ -84,9 +84,22 @@
 
 		public function generateXml($arrayOfTokens) {
 			$prestring = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-			$prestring = $prestring."<program language=\"IPPcode18\">\n";
 
-			$poststring = "</program>";
+			if ($arrayOfTokens[0] != ".IPPcode18") {
+				$this->throwException(21, "Wrong syntax of code", true);
+			} else {
+				$prestring = $prestring."<program language=\"IPPcode18\"";
+				array_shift($arrayOfTokens);
+			}
+			$poststring = "<\/program>";
+
+
+			foreach ($arrayOfTokens as $key => $token) {
+				$prestring = $prestring."<instruction order=\"".$key."\" opcode=\"".strtoupper($token)."\"";
+
+
+				$poststring = $poststring."<\/instruction>";
+			}
 		}
 
 	}
@@ -108,9 +121,7 @@
 	array_pop($parsedRows);
 
 	foreach ($parsedRows as $rows) {
-		foreach ($rows as $row) {
 
-		}
 	}
 
 
