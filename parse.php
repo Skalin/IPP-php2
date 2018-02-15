@@ -82,14 +82,14 @@
 			str_replace("&", "&amp;", $string);
 		}
 
-		public function generateXml($arrayOfTokens) {
+		public function generateXml($arraysOfTokens) {
 			$prestring = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
-			if ($arrayOfTokens[0] != ".IPPcode18") {
+			if ($arraysOfTokens[0] != ".IPPcode18") {
 				$this->throwException(21, "Wrong syntax of code", true);
 			} else {
 				$prestring = $prestring."<program language=\"IPPcode18\"";
-				array_shift($arrayOfTokens);
+				array_shift($arraysOfTokens);
 			}
 			$poststring = "<\/program>";
 
@@ -103,6 +103,66 @@
 		}
 
 	}
+
+	class Token {
+		private $type;
+		private $content;
+
+		/**
+		 * Token constructor.
+		 *
+		 * @param $type
+		 * @param $content
+		 */
+		public function __construct($type, $content = NULL) {
+			$this->type = $type;
+			$this->content = $content;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getType() {
+			return $this->type;
+		}
+
+		/**
+		 * @return null
+		 */
+		public function getContent() {
+			return $this->content;
+		}
+
+
+
+
+	}
+
+	class Lex {
+
+		private $arrayOfLines;
+		private $statsFlag;
+		private $tokenArray;
+
+
+		/**
+		 * Lex constructor.
+		 */
+		public function __construct($arrayOfLines, $statsFlag) {
+			$this->arrayOfLines = $arrayOfLines;
+			$this->statsFlag = $statsFlag;
+			$this->tokenArray = array();
+		}
+
+		public function analyse() {
+
+			foreach ($this->arrayOfLines as $line) {
+				$row = preg_replace('/\s+/', ' ',$line['message']);
+				$rowArray = explode(" ", $row);
+			}
+		}
+	}
+
 
 
 	$parser = new Parser();
