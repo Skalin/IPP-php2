@@ -7,28 +7,27 @@
 	 */
 
 
+	/**
+	 * Function for throwing exceptions and stopping the script
+	 *
+	 * @param int $errorCode selector of type of error
+	 * @param string $errorText Depending on this value function selects which type i will echo
+	 * @param bool $echo value selects whether to echo error or not.
+	 */
+	function throwException($errorCode, $errorText, $echo) {
+	global $fileName;
+	if ($echo == true) {
+		fwrite(STDERR, "ERROR: ".$errorText."\n");
+
+		fwrite(STDERR,"Please, consider looking for help, run script with: ".$fileName."--help\n");
+	}
+	exit($errorCode);
+	}
 
 	class Parser {
 
 		private $arguments = array("hF" => false, "sF" => false, "cF" => false, "lF" => false,);
 		private $statsFile = "";
-
-		/**
-		 * Function for throwing exceptions and stopping the script
-		 *
-		 * @param int $errorCode selector of type of error
-		 * @param string $errorText Depending on this value function selects which type i will echo
-		 * @param bool $echo value selects whether to echo error or not.
-		 */
-		protected function throwException($errorCode, $errorText, $echo) {
-			global $fileName;
-			if ($echo == true) {
-				fwrite(STDERR, "ERROR: ".$errorText."\n");
-
-				fwrite(STDERR,"Please, consider looking for help, run script with: ".$fileName."--help\n");
-			}
-			exit($errorCode);
-		}
 
 		/*
 		 * Function is reading the text from STDIN
@@ -64,13 +63,13 @@
 					} else if (preg_match("/--comments/", $argv[$i]) == 1) {
 						$this->arguments["cF"] = true;
 					} else {
-						$this->throwException(10, "Wrong usage of arguments!", true);
+						throwException(10, "Wrong usage of arguments!", true);
 					}
 				}
 				if (($this->arguments["lF"] || $this->arguments["cF"]) && $this->arguments["sF"] == false) {
-					$this->throwException(10, "Wrong usage of arguments!", true);
+					throwException(10, "Wrong usage of arguments!", true);
 				} else if (($this->arguments["lF"] || $this->arguments["cF"] || $this->arguments["sF"]) && $this->arguments["hF"] == true) {
-					$this->throwException(10, "Wrong usage of arguments!", true);
+					throwException(10, "Wrong usage of arguments!", true);
 				}
 			}
 			echo "Stats: ".$this->statsFile."\n";
@@ -86,7 +85,7 @@
 			$prestring = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
 			if ($arraysOfTokens[0] != ".IPPcode18") {
-				$this->throwException(21, "Wrong syntax of code", true);
+				throwException(21, "Wrong syntax of code", true);
 			} else {
 				$prestring = $prestring."<program language=\"IPPcode18\"";
 				array_shift($arraysOfTokens);
@@ -155,11 +154,59 @@
 		}
 
 		public function analyse() {
+			var_dump($this->arrayOfLines);
 
 			foreach ($this->arrayOfLines as $line) {
-				$row = preg_replace('/\s+/', ' ',$line['message']);
+				$row = preg_replace('/\s+/', ' ',$line);
 				$rowArray = explode(" ", $row);
+
+				for ($i = 0; $i < count($rowArray); $i++) {
+					switch($rowArray[$i]) {
+						case "MOVE":
+						case "CREATEFRAME":
+						case "PUSHFRAME":
+						case "POPFRAME":
+						case "DEFVAR":
+						case "CALL":
+						case "RETURN":
+						case "PUSHS":
+						case "POPS":
+						case "ADD":
+						case "SUB":
+						case "MUL":
+						case "IDIV":
+						case "LT":
+						case "GT":
+						case "EQ":
+						case "AND":
+						case "OR":
+						case "NOT":
+						case "INT2CHAR":
+						case "STRI2INT":
+						case "READ":
+						case "WRITE":
+						case "CONCAT":
+						case "STRLEN":
+						case "GETCHAR":
+						case "SETCHAR":
+						case "TYPE":
+						case "LABEL":
+						case "JUMP":
+						case "JUMPIFEQ":
+						case "JUMPIFNEQ":
+						case "DPRINT":
+						case "BREAK":
+						case "#":
+						default:
+
+					}
+				}
+
+
+
 			}
+
+			$this->tokenArray;
 		}
 	}
 
@@ -171,18 +218,11 @@
 	$parser->printHelp();
 
 	$input = $parser->readFromStdinToInput();
+	$arrayOfLines = explode("\n", $input);
+	$lex = new Lex($arrayOfLines, true);
 
+	$lex->analyse();
 
-
-
-	//var_dump($input);
-
-	$parsedRows = explode("\n", $input);
-	array_pop($parsedRows);
-
-	foreach ($parsedRows as $rows) {
-
-	}
 
 
 	exit(0);
