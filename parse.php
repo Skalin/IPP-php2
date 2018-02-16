@@ -174,24 +174,33 @@
 		}
 
 		public function analyse() {
+			if ($this->arrayOfLines[0] == ".IPPcode18") {
+				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
+				array_push($this->tokenArray, $token);
+			} else {
+				throwException(21, "LEX ERROR Analysis!",true);
+			}
 			foreach ($this->arrayOfLines as $line) {
 				$row = preg_replace('/\s+/', ' ',$line);
 				$rowArray = explode(" ", $row);
 
 				$commentFlag = false;
-				var_dump($rowArray);
 				for ($i = 0; $i < count($rowArray); $i++) {
 					switch($rowArray[$i]) {
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
 							$token = new Token(strtoupper($rowArray[$i]));
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/(LF|TF|GF)@(.+)/', $rowArray[$i]) ? true : false):
+						case (preg_match('/(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
 							$token = new Token("VARIABLE", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/(string|bool|int)@(.+)/', $rowArray[$i]) ? true : false):
+						case (preg_match('/(string|bool|int)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
+							array_push($this->tokenArray, $token);
+							break;
+						case (preg_match('/[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+							$token = new Token("JUMPLABEL", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
 						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
@@ -199,16 +208,12 @@
 							// comments
 							break 2;
 						default:
-							echo "jumping here";
 							throwException(21, "LEX ERROR Analysis!",true);
 							break;
 					}
 				}
-
-
-
 			}
-			var_dump($this->tokenArray);
+			return $this->tokenArray;
 		}
 	}
 
@@ -224,8 +229,9 @@
 	array_pop($arrayOfLines);
 	$lex = new Lex($arrayOfLines, true);
 
-	$lex->analyse();
+	$tokens = $lex->analyse();
 
+	var_dump($tokens);
 
 
 	exit(0);
