@@ -139,9 +139,15 @@
 
 	class Lex {
 
+		public $comments = 0;
+
 		private $arrayOfLines;
 		private $statsFlag;
 		private $tokenArray;
+		private $arrayOfInstructions = array("MOVE", "CREATEFRAME", "PUSHFRAME", "POPFRAME", "DEFVAR", "CALL", "RETURN", "PUSHS",
+			"POPS", "ADD", "SUB", "MUL", "IDIV", "LT", "GT", "EQ", "AND", "OR", "NOT", "INT2CHAR", "STR2INT",
+			"READ", "WRITE", "CONCAT", "STRLEN", "GETCHAR", "SETCHAR", "TYPE", "LABEL", "JUMP", "JUMPIFEQ",
+			"JUMPIFNEQ", "DPRINT", "BREAK");
 
 
 		/**
@@ -153,156 +159,49 @@
 			$this->tokenArray = array();
 		}
 
+		/**
+		 * @return mixed
+		 */
+		public function getComments() {
+			return $this->comments;
+		}
+
+		/**
+		 * @param mixed $comments
+		 */
+		public function setComments($comments) {
+			$this->comments = $comments;
+		}
+
 		public function analyse() {
 			foreach ($this->arrayOfLines as $line) {
 				$row = preg_replace('/\s+/', ' ',$line);
 				$rowArray = explode(" ", $row);
 
 				$commentFlag = false;
+				var_dump($rowArray);
 				for ($i = 0; $i < count($rowArray); $i++) {
 					switch($rowArray[$i]) {
-						case "MOVE":
-							$token = new Token("MOVE");
+						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
+							$token = new Token(strtoupper($rowArray[$i]));
 							array_push($this->tokenArray, $token);
 							break;
-						case "CREATEFRAME":
-							$token = new Token("CREATEFRAME");
+						case (preg_match('/(LF|TF|GF)@(.+)/', $rowArray[$i]) ? true : false):
+							$token = new Token("VARIABLE", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case "PUSHFRAME":
-							$token = new Token("PUSHFRAME");
+						case (preg_match('/(string|bool|int)@(.+)/', $rowArray[$i]) ? true : false):
+							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case "POPFRAME":
-							$token = new Token("POPFRAME");
-							array_push($this->tokenArray, $token);
-							break;
-						case "DEFVAR":
-							$token = new Token("DEFVAR");
-							array_push($this->tokenArray, $token);
-							break;
-						case "CALL":
-							$token = new Token("CALL");
-							array_push($this->tokenArray, $token);
-							break;
-						case "RETURN":
-							$token = new Token("CALL");
-							array_push($this->tokenArray, $token);
-							break;
-						case "PUSHS":
-							$token = new Token("PUSHS");
-							array_push($this->tokenArray, $token);
-							break;
-						case "POPS":
-							$token = new Token("POPS");
-							array_push($this->tokenArray, $token);
-							break;
-						case "ADD":
-						$token = new Token("ADD");
-						array_push($this->tokenArray, $token);
-						break;
-						case "SUB":
-						$token = new Token("SUB");
-						array_push($this->tokenArray, $token);
-						break;
-						case "MUL":
-						$token = new Token("MUL");
-						array_push($this->tokenArray, $token);
-						break;
-						case "IDIV":
-						$token = new Token("IDIV");
-						array_push($this->tokenArray, $token);
-						break;
-						case "LT":
-						$token = new Token("LT");
-						array_push($this->tokenArray, $token);
-						break;
-						case "GT":
-						$token = new Token("GT");
-						array_push($this->tokenArray, $token);
-						break;
-						case "EQ":
-						$token = new Token("EQ");
-						array_push($this->tokenArray, $token);
-						break;
-						case "AND":
-						$token = new Token("AND");
-						array_push($this->tokenArray, $token);
-						break;
-						case "OR":
-						$token = new Token("OR");
-						array_push($this->tokenArray, $token);
-						break;
-						case "NOT":
-						$token = new Token("NOT");
-						array_push($this->tokenArray, $token);
-						break;
-						case "INT2CHAR":
-						$token = new Token("INT2CHAR");
-						array_push($this->tokenArray, $token);
-						break;
-						case "STRI2INT":
-						$token = new Token("STRI2INT");
-						array_push($this->tokenArray, $token);
-						break;
-						case "READ":
-						$token = new Token("READ");
-						array_push($this->tokenArray, $token);
-						break;
-						case "WRITE":
-						$token = new Token("WRITE");
-						array_push($this->tokenArray, $token);
-						break;
-						case "CONCAT":
-						$token = new Token("CONCAT");
-						array_push($this->tokenArray, $token);
-						break;
-						case "STRLEN":
-						$token = new Token("STRLEN");
-						array_push($this->tokenArray, $token);
-						break;
-						case "GETCHAR":
-						$token = new Token("GETCHAR");
-						array_push($this->tokenArray, $token);
-						break;
-						case "SETCHAR":
-						$token = new Token("SETCHAR");
-						array_push($this->tokenArray, $token);
-						break;
-						case "TYPE":
-						$token = new Token("TYPE");
-						array_push($this->tokenArray, $token);
-						break;
-						case "LABEL":
-						$token = new Token("LABEL");
-						array_push($this->tokenArray, $token);
-						break;
-						case "JUMP":
-						$token = new Token("JUMP");
-						array_push($this->tokenArray, $token);
-						break;
-						case "JUMPIFEQ":
-						$token = new Token("JUMPIFEQ");
-						array_push($this->tokenArray, $token);
-						break;
-						case "JUMPIFNEQ":
-						$token = new Token("JUMPIFNEQ");
-						array_push($this->tokenArray, $token);
-						break;
-						case "DPRINT":
-						$token = new Token("DPRINT");
-						array_push($this->tokenArray, $token);
-						break;
-						case "BREAK":
-						$token = new Token("BREAK");
-						array_push($this->tokenArray, $token);
-						break;
-						case preg_match('/#(.*)/', $rowArray[$i]):
+						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
+							$this->setComments($this->getComments()+1);
 							// comments
-							$commentFlag = true;
-							break;
+							break 2;
 						default:
+							echo "jumping here";
 							throwException(21, "LEX ERROR Analysis!",true);
+							break;
 					}
 				}
 
@@ -322,6 +221,7 @@
 
 	$input = $parser->readFromStdinToInput();
 	$arrayOfLines = explode("\n", $input);
+	array_pop($arrayOfLines);
 	$lex = new Lex($arrayOfLines, true);
 
 	$lex->analyse();
