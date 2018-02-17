@@ -26,8 +26,77 @@
 
 	class Parser {
 
-		private $arguments = array("hF" => false, "sF" => false, "cF" => false, "lF" => false,);
-		private $statsFile = "";
+		private $hF;
+		private $sF;
+		private $lF;
+		private $cF;
+		private $statsFile;
+
+		public function __construct() {
+			$this->statsFile = "";
+			$this->hF = false;
+			$this->sF = false;
+			$this->lF = false;
+			$this->cF = false;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getHF() {
+			return $this->hF;
+		}
+
+		/**
+		 * @param mixed $hF
+		 */
+		public function setHF($hF) {
+			$this->hF = $hF;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getSF() {
+			return $this->sF;
+		}
+
+		/**
+		 * @param mixed $sF
+		 */
+		public function setSF($sF) {
+			$this->sF = $sF;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getLF() {
+			return $this->lF;
+		}
+
+		/**
+		 * @param mixed $lF
+		 */
+		public function setLF($lF) {
+			$this->lF = $lF;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getCF() {
+			return $this->cF;
+		}
+
+		/**
+		 * @param mixed $cF
+		 */
+		public function setCF($cF) {
+			$this->cF = $cF;
+		}
+
+
 
 		/**
 		 * @return string
@@ -58,42 +127,44 @@
 		}
 
 		public function printHelp() {
-			if ($this->arguments["hF"]) {
+			if ($this->getHF()) {
 				echo "Napoveda\n";
 				exit(0);
 			}
-		}
-
-		public function splitIntoLines($input) {
-
 		}
 
 
 		public function parseArguments($argc, $argv) {
 			if ($argc != 1) {
 				for ($i = 1; $i < $argc; $i++) {
-					echo "Curr. arg i: ".$i."\nCurr. arg: ".$argv[$i]."\n";
-					if (preg_match("/--help/", $argv[$i]) == 1 && $this->arguments["hF"] != true) {
-						$this->arguments["hF"] = true;
+					if (preg_match("/--help/", $argv[$i]) == 1 && $this->getHF() != true) {
+						$this->setHF(true);
 					} else if (preg_match("/--stats=.*/", $argv[$i]) == 1) {
-						$this->arguments["sF"] = true;
+						$this->setSF(true);
 						$this->setStatsFile(substr($argv[$i], 8));
 					} else if (preg_match("/--loc/", $argv[$i]) == 1) {
-						$this->arguments["lF"] = true;
+						$this->setLF(true);
 					} else if (preg_match("/--comments/", $argv[$i]) == 1) {
-						$this->arguments["cF"] = true;
+						$this->setCF(true);
 					} else {
 						throwException(10, "Wrong usage of arguments!", true);
 					}
 				}
-				if (($this->arguments["lF"] || $this->arguments["cF"]) && $this->arguments["sF"] == false) {
+				if (($this->getLF() || $this->getCF()) && $this->getSF() == false) {
 					throwException(10, "Wrong usage of arguments!", true);
-				} else if (($this->arguments["lF"] || $this->arguments["cF"] || $this->arguments["sF"]) && $this->arguments["hF"] == true) {
+				} else if (($this->getLF() || $this->getCF() || $this->getSF()) && $this->getHF() == true) {
 					throwException(10, "Wrong usage of arguments!", true);
 				} else if ($this->getStatsFile() == "") {
 					throwException(10, "Wrong stats file location!", true);
 				}
 			}
+			echo "Help: ".$this->getHF()."\n";
+			echo "Stats: ".$this->getSF()."\n";
+			if ($this->getSF()) {
+				echo "File Location: ".$this->getStatsFile()."\n";
+			}
+			echo "Loc: ".$this->getLF()."\n";
+			echo "Comments: ".$this->getCF()."\n";
 		}
 
 		private function convertStringLiterals($string) {
@@ -101,27 +172,6 @@
 			str_replace(">", "&gt;", $string);
 			str_replace("&", "&amp;", $string);
 		}
-
-		public function generateXml($arraysOfTokens) {
-			$prestring = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-
-			if ($arraysOfTokens[0] != ".IPPcode18") {
-				throwException(21, "Wrong syntax of code", true);
-			} else {
-				$prestring = $prestring."<program language=\"IPPcode18\"";
-				array_shift($arraysOfTokens);
-			}
-			$poststring = "<\/program>";
-
-
-			foreach ($arrayOfTokens as $key => $token) {
-				$prestring = $prestring."<instruction order=\"".$key."\" opcode=\"".strtoupper($token)."\"";
-
-
-				$poststring = $poststring."<\/instruction>";
-			}
-		}
-
 	}
 
 	class Token {
@@ -160,7 +210,8 @@
 
 	class Lex {
 
-		public $comments = 0;
+		private $comments = 0;
+		private $loc = 0;
 
 		private $arrayOfLines;
 		private $statsFlag;
@@ -190,9 +241,25 @@
 		/**
 		 * @param mixed $comments
 		 */
-		public function setComments($comments) {
+		private function setComments($comments) {
 			$this->comments = $comments;
 		}
+
+		/**
+		 * @return int
+		 */
+		public function getLoc() {
+			return $this->loc;
+		}
+
+		/**
+		 * @param int $loc
+		 */
+		public function setLoc($loc) {
+			$this->loc = $loc;
+		}
+
+
 
 /*
 		private function splitLines($line) {
@@ -276,6 +343,9 @@
 						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
 							// comments
 							$this->setComments($this->getComments()+1);
+							if ($i == 0) {
+								$this->setLoc($this->getLoc()-1);
+							}
 							break 2;
 						case (preg_match('/[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
 							$token = new Token("JUMPLABEL", $rowArray[$i]);
@@ -286,6 +356,7 @@
 							break;
 					}
 				}
+				$this->setLoc($this->getLoc()+1);
 			}
 			return $this->tokenArray;
 		}
@@ -305,9 +376,18 @@
 
 	$tokens = $lex->analyse();
 
-	var_dump($tokens);
+	if ($parser->getSF()) {
+		$stats = "";
+		if ($parser->getLF()) {
+			$stats = $stats.$lex->getLoc()."\n";
+		}
+		if ($parser->getCF()) {
+			$stats = $stats.$lex->getComments()."\n";
+		}
+		echo $stats;
+	}
+
+	//var_dump($tokens);
 
 
 	exit(0);
-
-?>
