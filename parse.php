@@ -7,6 +7,7 @@
 	 */
 
 
+	$fileName = "parse.php";
 	/**
 	 * Function for throwing exceptions and stopping the script
 	 *
@@ -16,11 +17,10 @@
 	 */
 	function throwException($errorCode, $errorText, $echo) {
 	global $fileName;
-	if ($echo == true) {
-		fwrite(STDERR, "ERROR: ".$errorText."\n");
-
-		fwrite(STDERR,"Please, consider looking for help, run script with: ".$fileName."--help\n");
-	}
+		if ($echo == true) {
+			fwrite(STDERR, "ERROR: ".$errorText."\n");
+			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$fileName." --help\n");
+		}
 	exit($errorCode);
 	}
 
@@ -123,6 +123,10 @@
 			while (($char = fgetc(STDIN)) !== false) {
 				$input = $input . $char;
 			}
+
+
+			$input = explode("\n", $input);
+			array_pop($input);
 			return $input;
 		}
 
@@ -132,7 +136,6 @@
 				exit(0);
 			}
 		}
-
 
 		public function parseArguments($argc, $argv) {
 			if ($argc != 1) {
@@ -154,10 +157,11 @@
 					throwException(10, "Wrong usage of arguments!", true);
 				} else if (($this->getLF() || $this->getCF() || $this->getSF()) && $this->getHF() == true) {
 					throwException(10, "Wrong usage of arguments!", true);
-				} else if ($this->getStatsFile() == "") {
+				} else if ($this->getSF() && $this->getStatsFile() == "") {
 					throwException(10, "Wrong stats file location!", true);
 				}
 			}
+
 			echo "Help: ".$this->getHF()."\n";
 			echo "Stats: ".$this->getSF()."\n";
 			if ($this->getSF()) {
@@ -259,30 +263,6 @@
 			$this->loc = $loc;
 		}
 
-
-
-/*
-		private function splitLines($line) {
-			$arr = str_split($line);
-			$lineArray = array();
-
-			echo count($arr)."\n\n\n\n";
-			$word = "";
-			for ($i = 0; $i < count($arr); $i++) {
-				if ($arr[$i] == " " || $arr[$i] == "#") {
-					array_push($lineArray, $word);
-					$word = "";
-				} else {
-					$word = $word.$arr[$i];
-				}
-				if ($i == (count($arr)-1)) {
-					array_push($lineArray, $word);
-				}
-			}
-			return $lineArray;
-		}
-
-*/
 		private function cleanArray($array) {
 			$cleanedArray = array();
 
@@ -369,9 +349,7 @@
 	$parser->parseArguments($argc, $argv);
 	$parser->printHelp();
 
-	$input = $parser->readFromStdinToInput();
-	$arrayOfLines = explode("\n", $input);
-	array_pop($arrayOfLines);
+	$arrayOfLines = $parser->readFromStdinToInput();
 	$lex = new Lex($arrayOfLines, true);
 
 	$tokens = $lex->analyse();
