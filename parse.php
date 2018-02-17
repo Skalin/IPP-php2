@@ -29,6 +29,21 @@
 		private $arguments = array("hF" => false, "sF" => false, "cF" => false, "lF" => false,);
 		private $statsFile = "";
 
+		/**
+		 * @return string
+		 */
+		public function getStatsFile() {
+			return $this->statsFile;
+		}
+
+		/**
+		 * @param string $statsFile
+		 */
+		public function setStatsFile($statsFile) {
+			$this->statsFile = $statsFile;
+		}
+
+
 		/*
 		 * Function is reading the text from STDIN
 		 *
@@ -49,6 +64,11 @@
 			}
 		}
 
+		public function splitIntoLines($input) {
+
+		}
+
+
 		public function parseArguments($argc, $argv) {
 			if ($argc != 1) {
 				for ($i = 1; $i < $argc; $i++) {
@@ -57,7 +77,7 @@
 						$this->arguments["hF"] = true;
 					} else if (preg_match("/--stats=.*/", $argv[$i]) == 1) {
 						$this->arguments["sF"] = true;
-						$this->statsFile = substr($argv[$i], 8);
+						$this->setStatsFile(substr($argv[$i], 8));
 					} else if (preg_match("/--loc/", $argv[$i]) == 1) {
 						$this->arguments["lF"] = true;
 					} else if (preg_match("/--comments/", $argv[$i]) == 1) {
@@ -70,9 +90,10 @@
 					throwException(10, "Wrong usage of arguments!", true);
 				} else if (($this->arguments["lF"] || $this->arguments["cF"] || $this->arguments["sF"]) && $this->arguments["hF"] == true) {
 					throwException(10, "Wrong usage of arguments!", true);
+				} else if ($this->getStatsFile() == "") {
+					throwException(10, "Wrong stats file location!", true);
 				}
 			}
-			echo "Stats: ".$this->statsFile."\n";
 		}
 
 		private function convertStringLiterals($string) {
@@ -173,6 +194,58 @@
 			$this->comments = $comments;
 		}
 
+/*
+		private function splitLines($line) {
+			$arr = str_split($line);
+			$lineArray = array();
+
+			echo count($arr)."\n\n\n\n";
+			$word = "";
+			for ($i = 0; $i < count($arr); $i++) {
+				if ($arr[$i] == " " || $arr[$i] == "#") {
+					array_push($lineArray, $word);
+					$word = "";
+				} else {
+					$word = $word.$arr[$i];
+				}
+				if ($i == (count($arr)-1)) {
+					array_push($lineArray, $word);
+				}
+			}
+			return $lineArray;
+		}
+
+*/
+		private function cleanArray($array) {
+			$cleanedArray = array();
+
+			foreach ($array as $key => $word) {
+				if ($word != "") {
+					array_push($cleanedArray, $word);
+				}
+			}
+
+			return $cleanedArray;
+		}
+
+		private function splitComments($array) {
+			$newArray = array();
+
+			foreach ($array as $key => $word) {
+				if (preg_match('/#(.*)/', $word)) {
+					array_push($newArray, substr($word,0, strpos($word, "#"))); // instruction
+					array_push($newArray, substr($word, strpos($word, "#"))); // comment
+					break;
+				} else {
+					array_push($newArray, $word);
+				}
+			}
+
+			$newArray = $this->cleanArray($newArray);
+			return $newArray;
+		}
+
+
 		public function analyse() {
 			if ($this->arrayOfLines[0] == ".IPPcode18") {
 				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
@@ -182,7 +255,8 @@
 			}
 			foreach ($this->arrayOfLines as $line) {
 				$row = preg_replace('/\s+/', ' ',$line);
-				$rowArray = explode(" ", $row);
+				$rowArray = explode(" ", $line);
+				$rowArray = $this->splitComments($rowArray);
 
 				$commentFlag = false;
 				for ($i = 0; $i < count($rowArray); $i++) {
@@ -199,14 +273,14 @@
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
+							// comments
+							$this->setComments($this->getComments()+1);
+							break 2;
+						case (preg_match('/[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
 							$token = new Token("JUMPLABEL", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
-							$this->setComments($this->getComments()+1);
-							// comments
-							break 2;
 						default:
 							throwException(21, "LEX ERROR Analysis!",true);
 							break;
