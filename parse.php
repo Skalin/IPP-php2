@@ -387,6 +387,7 @@
 						$instructionIterator++;
 						$xmlInstruction->addAttribute('opcode', $instructions[$i]->getContent());
 					} else if (in_array($instructions[$i]->getType(), array("VARIABLE", "CONSTANT", "JUMPLABEL"))) {
+						// do something
 					}
 					$i++;
 				} else {
@@ -396,15 +397,7 @@
 					}
 				}
 			}
-			echo $xmlProgram->asXML();
-
-			/*
-			foreach ($this->instructions as $instruction) {
-
-				echo $instruction->getType()."\n";
-				echo $instruction->getContent()."\n";
-			}*/
-
+			return $xmlProgram->asXML();
 		}
 
 		private function countNewLines($array) {
