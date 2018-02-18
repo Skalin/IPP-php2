@@ -306,10 +306,9 @@
 				}
 				foreach ($this->arrayOfLines as $line) {
 					$row = preg_replace('/\s+/', ' ',$line);
-					$rowArray = explode(" ", $line);
+					$rowArray = explode(" ", $row);
 					$rowArray = $this->splitComments($rowArray);
 
-					$commentFlag = false;
 					for ($i = 0; $i < count($rowArray); $i++) {
 						switch($rowArray[$i]) {
 							case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
@@ -340,8 +339,7 @@
 								break;
 						}
 					}
-					$token = new Token("NEWLINE");
-					array_push($this->tokenArray, $token);
+					array_push($this->tokenArray, new Token("NEWLINE"));
 					$this->setLoc($this->getLoc()+1);
 				}
 			}
@@ -432,6 +430,8 @@
 	$syntax = new Syntax($tokens);
 
 	$xml = new XML($tokens);
-	$xml->generateXml();
+	//$xml->generateXml();
+
+	var_dump($tokens);
 
 	exit(0);
