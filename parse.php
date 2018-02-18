@@ -362,6 +362,9 @@
 
 	class XML {
 
+		/**
+		 * @var Token[]
+		 */
 		private $instructions;
 
 		public function __construct($instructions) {
