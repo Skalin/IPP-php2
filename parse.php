@@ -13,7 +13,7 @@
 	 *
 	 * @param int $errorCode selector of type of error
 	 * @param string $errorText Depending on this value function selects which type i will echo
-	 * @param bool $echo value selects whether to echo error or not.
+	 * @param bool $talkative value selects whether to echo error or not.
 	 */
 	function throwException($errorCode, $errorText, $talkative) {
 	global $fileName;
