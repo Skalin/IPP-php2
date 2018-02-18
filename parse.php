@@ -212,10 +212,28 @@
 
 	}
 
+
+	class Stats {
+		private $stats;
+		private $loc;
+		private $comments;
+
+		public function __construct($stats, $statsFile, $loc, $comments) {
+			$this->stats = $stats;
+			$this->
+			$this->loc = $loc;
+			$this->comments = $comments;
+		}
+
+
+	}
+
+
+
 	class Lex {
 
-		private $comments = 0;
-		private $loc = 0;
+		private $comments;
+		private $loc;
 
 		private $arrayOfLines;
 		private $statsFlag;
@@ -233,6 +251,8 @@
 			$this->arrayOfLines = $arrayOfLines;
 			$this->statsFlag = $statsFlag;
 			$this->tokenArray = array();
+			$this->comments = 0;
+			$this->loc = 0;
 		}
 
 		/**
@@ -336,6 +356,8 @@
 							break;
 					}
 				}
+				$token = new Token("NEWLINE");
+				array_push($this->tokenArray, $token);
 				$this->setLoc($this->getLoc()+1);
 			}
 			return $this->tokenArray;
