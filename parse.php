@@ -15,9 +15,9 @@
 	 * @param string $errorText Depending on this value function selects which type i will echo
 	 * @param bool $echo value selects whether to echo error or not.
 	 */
-	function throwException($errorCode, $errorText, $echo) {
+	function throwException($errorCode, $errorText, $talkative) {
 	global $fileName;
-		if ($echo == true) {
+		if ($talkative) {
 			fwrite(STDERR, "ERROR: ".$errorText."\n");
 			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$fileName." --help\n");
 		}
