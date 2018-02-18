@@ -7,7 +7,9 @@
 	 */
 
 
+
 	$fileName = "parse.php";
+
 	/**
 	 * Function for throwing exceptions and stopping the script
 	 *
@@ -24,14 +26,35 @@
 	exit($errorCode);
 	}
 
+	/**
+	 * Class Parser
+	 */
 	class Parser {
 
+		/**
+		 * @var bool
+		 */
 		private $hF;
+		/**
+		 * @var bool
+		 */
 		private $sF;
+		/**
+		 * @var bool
+		 */
 		private $lF;
+		/**
+		 * @var bool
+		 */
 		private $cF;
+		/**
+		 * @var string
+		 */
 		private $statsFile;
 
+		/**
+		 * Parser constructor.
+		 */
 		public function __construct() {
 			$this->statsFile = "";
 			$this->hF = false;
@@ -118,6 +141,9 @@
 		 *
 		 * @return string $input Text from STDIN is converted into string and returned, if no chars were read, function returns blank string
 		 */
+		/**
+		 * @return array|string
+		 */
 		public function readFromStdinToInput() {
 			$input = "";
 			while (($char = fgetc(STDIN)) !== false) {
@@ -130,6 +156,9 @@
 			return $input;
 		}
 
+		/**
+		 *
+		 */
 		public function printHelp() {
 			if ($this->getHF()) {
 				echo "Napoveda\n";
@@ -137,6 +166,10 @@
 			}
 		}
 
+		/**
+		 * @param $argc
+		 * @param $argv
+		 */
 		public function parseArguments($argc, $argv) {
 			if ($argc != 1) {
 				for ($i = 1; $i < $argc; $i++) {
@@ -171,6 +204,9 @@
 			echo "Comments: ".$this->getCF()."\n";
 		}
 
+		/**
+		 * @param $string
+		 */
 		private function convertStringLiterals($string) {
 			str_replace("<", "&lt;", $string);
 			str_replace(">", "&gt;", $string);
@@ -178,8 +214,19 @@
 		}
 	}
 
+
+	/**
+	 * Class Token
+	 */
 	class Token {
+
+		/**
+		 * @var
+		 */
 		private $type;
+		/**
+		 * @var null
+		 */
 		private $content;
 
 		/**
@@ -200,26 +247,44 @@
 			return $this->type;
 		}
 
+
 		/**
 		 * @return null
 		 */
 		public function getContent() {
 			return $this->content;
 		}
-
-
-
-
 	}
 
+	/**
+	 * Class Lex
+	 */
 	class Lex {
 
+		/**
+		 * @var int
+		 */
 		private $comments;
+		/**
+		 * @var int
+		 */
 		private $loc;
 
+		/**
+		 * @var
+		 */
 		private $arrayOfLines;
+		/**
+		 * @var
+		 */
 		private $statsFlag;
+		/**
+		 * @var array
+		 */
 		private $tokenArray;
+		/**
+		 * @var array
+		 */
 		private $arrayOfInstructions = array("MOVE", "CREATEFRAME", "PUSHFRAME", "POPFRAME", "DEFVAR", "CALL", "RETURN", "PUSHS",
 			"POPS", "ADD", "SUB", "MUL", "IDIV", "LT", "GT", "EQ", "AND", "OR", "NOT", "INT2CHAR", "STR2INT",
 			"READ", "WRITE", "CONCAT", "STRLEN", "GETCHAR", "SETCHAR", "TYPE", "LABEL", "JUMP", "JUMPIFEQ",
@@ -228,6 +293,9 @@
 
 		/**
 		 * Lex constructor.
+		 *
+		 * @param $arrayOfLines
+		 * @param $statsFlag
 		 */
 		public function __construct($arrayOfLines, $statsFlag) {
 			$this->arrayOfLines = $arrayOfLines;
@@ -265,6 +333,10 @@
 			$this->loc = $loc;
 		}
 
+		/**
+		 * @param $array
+		 * @return array
+		 */
 		private function cleanArray($array) {
 			$cleanedArray = array();
 
@@ -277,6 +349,10 @@
 			return $cleanedArray;
 		}
 
+		/**
+		 * @param $array
+		 * @return array
+		 */
 		private function splitComments($array) {
 			$newArray = array();
 
@@ -295,6 +371,9 @@
 		}
 
 
+		/**
+		 * @return array
+		 */
 		public function analyse() {
 			if (count($this->arrayOfLines) > 0) {
 
@@ -348,16 +427,30 @@
 	}
 
 
+	/**
+	 * Class Syntax
+	 */
 	class Syntax {
 
+		/**
+		 * @var array
+		 */
 		private $tokens = array();
 
+		/**
+		 * Syntax constructor.
+		 *
+		 * @param $tokenArray
+		 */
 		public function __construct($tokenArray) {
 			$this->tokens = $tokenArray;
 		}
 	}
 
 
+	/**
+	 * Class XML
+	 */
 	class XML {
 
 		/**
@@ -365,10 +458,18 @@
 		 */
 		private $instructions;
 
+		/**
+		 * XML constructor.
+		 *
+		 * @param $instructions
+		 */
 		public function __construct($instructions) {
 			$this->instructions = $instructions;
 		}
 
+		/**
+		 * @return mixed
+		 */
 		public function generateXml() {
 			$instructions = $this->instructions;
 			$xmlProgram = new SimpleXMLElement("<program></program>");
@@ -397,11 +498,6 @@
 			}
 			return $xmlProgram->asXML();
 		}
-
-		private function countNewLines($array) {
-
-		}
-
 	}
 
 
