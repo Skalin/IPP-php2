@@ -203,15 +203,6 @@
 			echo "Loc: ".$this->getLF()."\n";
 			echo "Comments: ".$this->getCF()."\n";
 		}
-
-		/**
-		 * @param $string
-		 */
-		private function convertStringLiterals($string) {
-			str_replace("<", "&lt;", $string);
-			str_replace(">", "&gt;", $string);
-			str_replace("&", "&amp;", $string);
-		}
 	}
 
 
@@ -247,6 +238,12 @@
 			return $this->type;
 		}
 
+		/**
+		 * @param mixed $type
+		 */
+		public function setType($type) {
+			$this->type = $type;
+		}
 
 		/**
 		 * @return null
@@ -254,6 +251,14 @@
 		public function getContent() {
 			return $this->content;
 		}
+
+		/**
+		 * @param null $content
+		 */
+		public function setContent($content) {
+			$this->content = $content;
+		}
+
 	}
 
 	/**
@@ -465,6 +470,15 @@
 		 */
 		public function __construct($instructions) {
 			$this->instructions = $instructions;
+		}
+
+		/**
+		 * @param $string
+		 */
+		private function convertStringLiterals($string) {
+			str_replace("<", "&lt;", $string);
+			str_replace(">", "&gt;", $string);
+			str_replace("&", "&amp;", $string);
 		}
 
 		/**
