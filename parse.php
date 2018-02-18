@@ -212,24 +212,6 @@
 
 	}
 
-
-	class Stats {
-		private $stats;
-		private $loc;
-		private $comments;
-
-		public function __construct($stats, $statsFile, $loc, $comments) {
-			$this->stats = $stats;
-			$this->
-			$this->loc = $loc;
-			$this->comments = $comments;
-		}
-
-
-	}
-
-
-
 	class Lex {
 
 		private $comments;
@@ -314,56 +296,119 @@
 
 
 		public function analyse() {
-			if ($this->arrayOfLines[0] == ".IPPcode18") {
-				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
-				array_push($this->tokenArray, $token);
-			} else {
-				throwException(21, "LEX ERROR Analysis!",true);
-			}
-			foreach ($this->arrayOfLines as $line) {
-				$row = preg_replace('/\s+/', ' ',$line);
-				$rowArray = explode(" ", $line);
-				$rowArray = $this->splitComments($rowArray);
+			if (count($this->arrayOfLines) > 0) {
 
-				$commentFlag = false;
-				for ($i = 0; $i < count($rowArray); $i++) {
-					switch($rowArray[$i]) {
-						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
-							$token = new Token(strtoupper($rowArray[$i]));
-							array_push($this->tokenArray, $token);
-							break;
-						case (preg_match('/(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
-							$token = new Token("VARIABLE", $rowArray[$i]);
-							array_push($this->tokenArray, $token);
-							break;
-						case (preg_match('/(string|bool|int)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
-							$token = new Token("CONSTANT", $rowArray[$i]);
-							array_push($this->tokenArray, $token);
-							break;
-						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
-							// comments
-							$this->setComments($this->getComments()+1);
-							if ($i == 0) {
-								$this->setLoc($this->getLoc()-1);
-							}
-							break 2;
-						case (preg_match('/[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
-							$token = new Token("JUMPLABEL", $rowArray[$i]);
-							array_push($this->tokenArray, $token);
-							break;
-						default:
-							throwException(21, "LEX ERROR Analysis!",true);
-							break;
-					}
+				if ($this->arrayOfLines[0] == ".IPPcode18") {
+					$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
+					array_push($this->tokenArray, $token);
+				} else {
+					throwException(21, "LEX ERROR Analysis!",true);
 				}
-				$token = new Token("NEWLINE");
-				array_push($this->tokenArray, $token);
-				$this->setLoc($this->getLoc()+1);
+				foreach ($this->arrayOfLines as $line) {
+					$row = preg_replace('/\s+/', ' ',$line);
+					$rowArray = explode(" ", $line);
+					$rowArray = $this->splitComments($rowArray);
+
+					$commentFlag = false;
+					for ($i = 0; $i < count($rowArray); $i++) {
+						switch($rowArray[$i]) {
+							case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
+								$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
+								array_push($this->tokenArray, $token);
+								break;
+							case (preg_match('/(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+								$token = new Token("VARIABLE", $rowArray[$i]);
+								array_push($this->tokenArray, $token);
+								break;
+							case (preg_match('/(string|bool|int)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+								$token = new Token("CONSTANT", $rowArray[$i]);
+								array_push($this->tokenArray, $token);
+								break;
+							case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
+								// comments
+								$this->setComments($this->getComments()+1);
+								if ($i == 0) {
+									$this->setLoc($this->getLoc()-1);
+								}
+								break 2;
+							case (preg_match('/[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+								$token = new Token("JUMPLABEL", $rowArray[$i]);
+								array_push($this->tokenArray, $token);
+								break;
+							default:
+								throwException(21, "LEX ERROR Analysis!",true);
+								break;
+						}
+					}
+					$token = new Token("NEWLINE");
+					array_push($this->tokenArray, $token);
+					$this->setLoc($this->getLoc()+1);
+				}
 			}
 			return $this->tokenArray;
 		}
 	}
 
+
+	class Syntax {
+
+		private $tokens = array();
+
+		public function __construct($tokenArray) {
+			$this->tokens = $tokenArray;
+		}
+	}
+
+
+	class XML {
+
+		private $instructions;
+
+		public function __construct($instructions) {
+			$this->instructions = $instructions;
+		}
+
+		public function generateXml() {
+			$instructions = $this->instructions;
+			$xmlProgram = new SimpleXMLElement("<program></program>");
+			$i = 0;
+			$instructionIterator = 1;
+			while ($i < count($instructions)) {
+				if ($instructions[$i]->getType() != "NEWLINE") {
+					echo "NOT NEW LINE\n";
+					if ($instructions[$i]->getType() == "PROGRAM") {
+						$xmlProgram->addAttribute('language', '.IPPcode18');
+					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
+						$xmlInstruction = $xmlProgram->addChild('instruction');
+						$xmlInstruction->addAttribute('order', $instructionIterator);
+						$instructionIterator++;
+						$xmlInstruction->addAttribute('opcode', $instructions[$i]->getContent());
+					} else if (in_array($instructions[$i]->getType(), array("VARIABLE", "CONSTANT", "JUMPLABEL"))) {
+					}
+					$i++;
+				} else {
+					while($i > 0) {
+						array_shift($instructions);
+						$i--;
+					}
+				}
+			}
+			echo $xmlProgram->asXML();
+
+			/*
+			foreach ($this->instructions as $instruction) {
+
+				echo $instruction->getType()."\n";
+				echo $instruction->getContent()."\n";
+			}*/
+
+		}
+
+		private function countNewLines($array) {
+
+		}
+
+	}
 
 
 	$parser = new Parser();
@@ -387,7 +432,10 @@
 		echo $stats;
 	}
 
-	//var_dump($tokens);
 
+	$syntax = new Syntax($tokens);
+
+	$xml = new XML($tokens);
+	$xml->generateXml();
 
 	exit(0);
