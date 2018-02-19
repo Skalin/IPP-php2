@@ -493,7 +493,7 @@
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
 					echo "NOT NEW LINE\n";
-					if ($instructions[$i]->getType() == "PROGRAM") {
+					if ($instructions[$i]->getType() == "PROGRAM") {``
 						$xmlProgram->addAttribute('language', '.IPPcode18');
 					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
 						$xmlInstruction = $xmlProgram->addChild('instruction');
