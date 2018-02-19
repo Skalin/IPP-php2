@@ -371,7 +371,7 @@
 				}
 			}
 
-			$newArray = $this->cleanArray($newArray);
+			//$newArray = $this->cleanArray($newArray);
 			return $newArray;
 		}
 
@@ -489,6 +489,7 @@
 			$xmlProgram = new SimpleXMLElement("<program></program>");
 			$i = 0;
 			$instructionIterator = 1;
+			$argumentIterator = 1;
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
 					echo "NOT NEW LINE\n";
@@ -499,15 +500,21 @@
 						$xmlInstruction->addAttribute('order', $instructionIterator);
 						$instructionIterator++;
 						$xmlInstruction->addAttribute('opcode', $instructions[$i]->getContent());
-					} else if (in_array($instructions[$i]->getType(), array("VARIABLE", "CONSTANT", "JUMPLABEL"))) {
-						// do something
+					} else {
+						$arg = "arg".$argumentIterator;
+						$xmlArgument = $xmlInstruction->addChild($arg);
+						$xmlArgument->addAttribute('type', $instructions[$i]->getType());
+						$xmlArgument->addAttribute('content', $instructions[$i]->getContent());
+						echo $xmlProgram->asXML();
 					}
 					$i++;
 				} else {
+					echo "IS NEW LINE\n";
 					while($i > 0) {
 						array_shift($instructions);
 						$i--;
 					}
+					$argumentIterator = 0;
 				}
 			}
 			return $xmlProgram->asXML();
@@ -540,8 +547,8 @@
 	$syntax = new Syntax($tokens);
 
 	$xml = new XML($tokens);
-	//$xml->generateXml();
+	$xml->generateXml();
 
-	var_dump($tokens);
+	//var_dump($tokens);
 
 	exit(0);
