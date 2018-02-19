@@ -440,7 +440,47 @@
 		/**
 		 * @var array
 		 */
-		private $tokens = array();
+		private $syntaxRules = array(
+			"MOVE" => array("VAR", "SYMB"),
+			"CREATEFRAME" => array(),
+			"PUSHFRAME" => array(),
+			"POPFRAME" => array(),
+			"DEFVAR" => array("VAR"),
+			"CALL" => array("JUMPLABEL"),
+			"RETURN" => array(),
+			"PUSHS" => array("SYMB"),
+			"POPS" => array("VAR"),
+			"ADD" => array("VAR", "SYMB", "SYMB"),
+			"SUB" => array("VAR", "SYMB", "SYMB"),
+			"MUL" => array("VAR", "SYMB", "SYMB"),
+			"IDIV" => array("VAR", "SYMB", "SYMB"),
+			"LT" => array("VAR", "SYMB", "SYMB"),
+			"GT" => array("VAR", "SYMB", "SYMB"),
+			"EQ" => array("VAR", "SYMB", "SYMB"),
+			"AND" => array("VAR", "SYMB", "SYMB"),
+			"OR" => array("VAR", "SYMB", "SYMB"),
+			"NOT" => array("VAR", "SYMB", "SYMB"),
+			"INT2CHAR" => array("VAR", "SYMB"),
+			"STR2INT" => array("VAR", "SYMB", "SYMB"),
+			"READ" => array("VAR", "CONSTANT"),
+			"WRITE" => array("SYMB"),
+			"CONCAT" => array("VAR", "SYMB", "SYMB"),
+			"STRLEN" => array("VAR", "SYMB"),
+			"GETCHAR" => array("VAR", "SYMB", "SYMB"),
+			"SETCHAR" => array("VAR", "SYMB", "SYMB"),
+			"TYPE" => array("VAR", "SYMB"),
+			"LABEL" => array("CONSTANT"),
+			"JUMP" => array("JUMPLABEL"),
+			"JUMPIFEQ" => array("VAR", "SYMB", "SYMB"),
+			"JUMPIFNEQ" => array("VAR", "SYMB", "SYMB"),
+			"DPRINT" => array("SYMB"),
+			"BREAK" => array()
+		);
+
+		/**
+		 * @var Token[]
+		 */
+		private $arrayOfTokens;
 
 		/**
 		 * Syntax constructor.
@@ -448,7 +488,20 @@
 		 * @param $tokenArray
 		 */
 		public function __construct($tokenArray) {
-			$this->tokens = $tokenArray;
+			$this->arrayOfTokens = $tokenArray;
+		}
+
+		/**
+		 * @param $token
+		 */
+		private function getAmountOfArguments(Token $inputToken) {
+			foreach ($this->syntaxRules as $key => $rule) {
+				var_dump($key);
+				echo "NEWLINE\n";
+				if ($rule == $inputToken->getType()) {
+
+				}
+			}
 		}
 	}
 
