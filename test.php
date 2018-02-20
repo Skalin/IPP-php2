@@ -120,7 +120,7 @@
 					if (preg_match("/--help/", $this->arguments[$i]) == 1 && $this->isHF() != true) {
 						$this->setHF(true);
 					} else if (preg_match("/--recursive/", $this->arguments[$i]) == 1 && $this->isRF() != true) {
-							$this->setRF(true);
+						$this->setRF(true);
 					} else if (preg_match("/--directory=.*/", $this->arguments[$i]) == 1 && $this->getDirPath() == "./") {
 						$this->setDirPath(substr($this->arguments[$i], 12));
 					} else if (preg_match("/--parse-script=.*/", $this->arguments[$i]) == 1 && $this->getParsePath() == "parse.php") {
@@ -133,11 +133,17 @@
 				}
 				if (($this->getParsePath() != "interpret.py" || $this->getDirPath() != "./" || $this->getParsePath() != "parse.php" || $this->isRF()) && $this->isHF() == true) {
 					throwException(10, "Wrong usage of arguments!", true);
-				};
+				}
 			}
 		}
+	}
 
-
+	class Test {
+		private $name;
+		private $srcF;
+		private $inF;
+		private $outF;
+		private $rcF;
 	}
 
 
