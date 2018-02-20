@@ -371,7 +371,7 @@
 				}
 			}
 
-			//$newArray = $this->cleanArray($newArray);
+			$newArray = $this->cleanArray($newArray);
 			return $newArray;
 		}
 
@@ -403,7 +403,7 @@
 								$token = new Token("VARIABLE", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
-							case (preg_match('/(string|bool|int)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+							case (preg_match('/(string|bool|int)@[%|_|-|\$|&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*/', $rowArray[$i]) ? true : false):
 								$token = new Token("CONSTANT", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
@@ -492,16 +492,55 @@
 		}
 
 		/**
+		 * @param Token[] $arrayOfTokens
+		 */
+		private function cleanDuplicateNewLines($arrayOfTokens) {
+			$cleanedArray = array();
+
+			$previousTokenType = $arrayOfTokens[0]->getType();
+			foreach ($arrayOfTokens as $token) {
+				if ($token->getType() == "NEWLINE" && $previousTokenType == "NEWLINE"){
+					// skip (it is easier this way)
+				} else {
+					array_push($cleanedArray, $token);
+				}
+				$previousTokenType = $token->getType();
+			}
+
+
+			return $cleanedArray;
+		}
+
+		/**
+		 *
+		 */
+		public function analyse() {
+
+			$this->arrayOfTokens = $this->cleanDuplicateNewLines($this->arrayOfTokens);
+
+			$amountOfArguments = 0;
+			for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
+				echo "TYP: ".$this->arrayOfTokens[$i]->getType()."\n";
+				if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
+					$amountOfArguments = $this->getAmountOfArguments($this->arrayOfTokens[$i]);
+					echo "INSTRUKCE: ".$this->arrayOfTokens[$i]->getContent()."\n";
+					echo "POCET ARGUMENT: ".$amountOfArguments."\n";
+				}
+			}
+		}
+
+
+		/**
 		 * @param $token
 		 */
 		private function getAmountOfArguments(Token $inputToken) {
-			foreach ($this->syntaxRules as $key => $rule) {
-				var_dump($key);
-				echo "NEWLINE\n";
-				if ($rule == $inputToken->getType()) {
 
+			foreach ($this->syntaxRules as $key => $rules) {
+				if ($key == $inputToken->getContent()) {
+					return count($rules);
 				}
 			}
+			return -1;
 		}
 	}
 
@@ -546,7 +585,7 @@
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
 					echo "NOT NEW LINE\n";
-					if ($instructions[$i]->getType() == "PROGRAM") {``
+					if ($instructions[$i]->getType() == "PROGRAM") {
 						$xmlProgram->addAttribute('language', '.IPPcode18');
 					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
 						$xmlInstruction = $xmlProgram->addChild('instruction');
@@ -596,11 +635,13 @@
 		echo $stats;
 	}
 
+	//var_dump($tokens);
 
 	$syntax = new Syntax($tokens);
+	$syntax->analyse();
 
 	$xml = new XML($tokens);
-	$xml->generateXml();
+	//$xml->generateXml();
 
 	//var_dump($tokens);
 
