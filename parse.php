@@ -511,6 +511,10 @@
 			return $cleanedArray;
 		}
 
+		private function checkArguments() {
+
+		}
+
 		/**
 		 *
 		 */
@@ -525,6 +529,8 @@
 					$amountOfArguments = $this->getAmountOfArguments($this->arrayOfTokens[$i]);
 					echo "INSTRUKCE: ".$this->arrayOfTokens[$i]->getContent()."\n";
 					echo "POCET ARGUMENT: ".$amountOfArguments."\n";
+
+					$i += $amountOfArguments;
 				}
 			}
 		}
