@@ -6,25 +6,10 @@
 	 * Time: 16:44
 	 */
 
+	include("global.php");
 
 
 	$fileName = "parse.php";
-
-	/**
-	 * Function for throwing exceptions and stopping the script
-	 *
-	 * @param int $errorCode selector of type of error
-	 * @param string $errorText Depending on this value function selects which type i will echo
-	 * @param bool $talkative value selects whether to echo error or not.
-	 */
-	function throwException($errorCode, $errorText, $talkative) {
-	global $fileName;
-		if ($talkative) {
-			fwrite(STDERR, "ERROR: ".$errorText."\n");
-			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$fileName." --help\n");
-		}
-	exit($errorCode);
-	}
 
 	/**
 	 * Class Parser
