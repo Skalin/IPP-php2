@@ -522,8 +522,10 @@
 			if (count($this->getRules($tokenArray[$start])) != $amount) {
 				throwException(21, "SYNTAX error analysis!", true);
 			} else {
-				echo "VSTUP: ".$tokenArray[$start]->getType()."\n";
-				echo "PRAVIDLO: ".$this->getRules($tokenArray[$start])."\n";
+				echo "VSTUP: ".$tokenArray[$start]->getType()." - ".$tokenArray[$start]->getContent()."\n";
+				echo "PRAVIDLO: ";
+				print_r($this->getRules($tokenArray[$start]));
+				echo "\n";
 				for ($i = 1; $i < $amount; $i++) {
 				}
 			}
