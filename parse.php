@@ -511,8 +511,25 @@
 			return $cleanedArray;
 		}
 
-		private function checkArguments() {
+		/**
+		 * @param Token[] $tokenArray
+		 * @param $start
+		 * @param $amount
+		 * @return bool
+		 */
+		private function checkArguments($tokenArray, $start, $amount) {
 
+			if (count($this->getRules($tokenArray[$start])) != $amount) {
+				throwException(21, "SYNTAX error analysis!", true);
+			} else {
+				echo "VSTUP: ".$tokenArray[$start]->getType()."\n";
+				echo "PRAVIDLO: ".$this->getRules($tokenArray[$start])."\n";
+				for ($i = 1; $i < $amount; $i++) {
+				}
+			}
+
+
+			return true;
 		}
 
 		/**
@@ -524,15 +541,28 @@
 
 			$amountOfArguments = 0;
 			for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
-				echo "TYP: ".$this->arrayOfTokens[$i]->getType()."\n";
 				if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
 					$amountOfArguments = $this->getAmountOfArguments($this->arrayOfTokens[$i]);
-					echo "INSTRUKCE: ".$this->arrayOfTokens[$i]->getContent()."\n";
-					echo "POCET ARGUMENT: ".$amountOfArguments."\n";
-
+					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
+						throwException(21, "SYNTAX error analysis!", true);
+					}
 					$i += $amountOfArguments;
 				}
 			}
+		}
+
+
+		/**
+		 * @param Token $inputToken
+		 * @return bool|mixed
+		 */
+		private function getRules(Token $inputToken) {
+			foreach ($this->syntaxRules as $key => $rules) {
+				if ($key == $inputToken->getContent()) {
+					return ($rules);
+				}
+			}
+			return false;
 		}
 
 
