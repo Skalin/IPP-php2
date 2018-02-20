@@ -382,7 +382,7 @@
 		public function analyse() {
 			if (count($this->arrayOfLines) > 0) {
 
-				if ($this->arrayOfLines[0] == ".IPPcode18") {
+				if (strtoupper($this->arrayOfLines[0]) == ".IPPCODE18") {
 					$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
 					array_push($this->tokenArray, $token);
 				} else {
@@ -622,7 +622,7 @@
 				if ($instructions[$i]->getType() != "NEWLINE") {
 					echo "NOT NEW LINE\n";
 					if ($instructions[$i]->getType() == "PROGRAM") {
-						$xmlProgram->addAttribute('language', '.IPPcode18');
+						$xmlProgram->addAttribute('language', $instructions[0]);
 					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
 						$xmlInstruction = $xmlProgram->addChild('instruction');
 						$xmlInstruction->addAttribute('order', $instructionIterator);
