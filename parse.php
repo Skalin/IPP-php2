@@ -637,6 +637,7 @@
 			$i = 0;
 			$instructionIterator = 1;
 			$argumentIterator = 1;
+			// TODO rework this into workingstate
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
 					//echo "NOT NEW LINE\n";
@@ -656,7 +657,7 @@
 					}
 					$i++;
 				} else {
-					echo "IS NEW LINE\n";
+					//echo "IS NEW LINE\n";
 					while($i > 0) {
 						array_shift($instructions);
 						$i--;
@@ -694,7 +695,7 @@
 	$syntax->analyse();
 
 	$xml = new XML($tokens);
-	//echo $xml->generateXml();
+	echo $xml->generateXml();
 
 
 	exit(0);
