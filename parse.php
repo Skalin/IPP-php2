@@ -399,11 +399,11 @@
 								$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
 								array_push($this->tokenArray, $token);
 								break;
-							case (preg_match('/(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
+							case (preg_match('/^(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 								$token = new Token("VARIABLE", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
-							case (preg_match('/(string|bool|int)@[%|_|-|\$|&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*/', $rowArray[$i]) ? true : false):
+							case (preg_match('/^(string|bool|int)@[%|_|-|\$|&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
 								$token = new Token("CONSTANT", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
@@ -414,8 +414,8 @@
 									$this->setLoc($this->getLoc()-1);
 								}
 								break 2;
-							case (preg_match('/[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+/', $rowArray[$i]) ? true : false):
-								$token = new Token("JUMPLABEL", $rowArray[$i]);
+							case (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+								$token = new Token("LABEL", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
 							default:
