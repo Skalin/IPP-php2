@@ -521,15 +521,16 @@
 		 */
 		private function checkArguments($tokenArray, $start, $amount) {
 
+			// TODO změna počítání do newline v token array, protože $amount je aktualne to same jako pocet pravidel z getRules()
 			if (count($this->getRules($tokenArray[$start])) != $amount) {
-				throwException(21, "SYNTAX error analysis!", true);
+				return false;
 			} else {
 				$rules = $this->getRules($tokenArray[$start]);
 				for ($i = 0; $i <= ($amount - 1); $i++) {
 					if ($rules[$i] == "VARIABLE" || $rules[$i] == "LABEL") {
 						if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 						} else {
-							throwException(21, "SYNTAX error analysis!", true);
+							return false;
 						}
 					} else if ($rules[$i] == "SYMB" || $rules[$i] == "CONSTANT") {
 						if (in_array($tokenArray[$start + $i + 1]->getType(), $this->symbs)) {
@@ -541,10 +542,10 @@
 								$tokenArray[$start + $i + 1]->setContent($content);
 							}
 						} else {
-							throwException(21, "SYNTAX error analysis!", true);
+							return false;
 						}
 					} else {
-						throwException(21, "SYNTAX error analysis!", true);
+						return false;
 					}
 				}
 			}
@@ -558,7 +559,6 @@
 
 			$this->arrayOfTokens = $this->cleanDuplicateNewLines($this->arrayOfTokens);
 
-			$amountOfArguments = 0;
 			for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
 				if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
 					$amountOfArguments = $this->getAmountOfArguments($this->arrayOfTokens[$i]);
@@ -633,14 +633,12 @@
 		 */
 		public function generateXml() {
 			$instructions = $this->instructions;
-			$xmlProgram = new SimpleXMLElement("<program></program>");
+			$xmlProgram = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."<program></program>");
 			$i = 0;
 			$instructionIterator = 1;
 			$argumentIterator = 1;
-			// TODO rework this into workingstate
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
-					//echo "NOT NEW LINE\n";
 					if ($instructions[$i]->getType() == "PROGRAM") {
 						$xmlProgram->addAttribute('language', $instructions[0]->getContent());
 					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
@@ -649,20 +647,22 @@
 						$instructionIterator++;
 						$xmlInstruction->addAttribute('opcode', $instructions[$i]->getContent());
 					} else {
-						$arg = "arg".$argumentIterator;
-						$xmlArgument = $xmlInstruction->addChild($arg);
-						$xmlArgument->addAttribute('type', $instructions[$i]->getType());
-						$xmlArgument->addAttribute('content', $instructions[$i]->getContent());
-						echo $xmlProgram->asXML();
+						if (isset($xmlInstruction)) {
+							$arg = "arg".$argumentIterator;
+							$xmlArgument = $xmlInstruction->addChild($arg);
+							$xmlArgument->addAttribute('type', $instructions[$i]->getType());
+							$xmlArgument[0] = $instructions[$i]->getContent();
+							$argumentIterator++;
+						}
 					}
 					$i++;
 				} else {
-					//echo "IS NEW LINE\n";
 					while($i > 0) {
 						array_shift($instructions);
 						$i--;
 					}
-					$argumentIterator = 0;
+					array_shift($instructions);
+					$argumentIterator = 1;
 				}
 			}
 			return $xmlProgram->asXML();
@@ -689,6 +689,8 @@
 			$stats = $stats.$lex->getComments()."\n";
 		}
 		echo $stats;
+
+		// TODO saving into file
 	}
 
 	$syntax = new Syntax($tokens);
