@@ -441,41 +441,43 @@
 		 * @var array
 		 */
 		private $syntaxRules = array(
-			"MOVE" => array("VAR", "SYMB"),
+			"MOVE" => array("VARIABLE", "SYMB"),
 			"CREATEFRAME" => array(),
 			"PUSHFRAME" => array(),
 			"POPFRAME" => array(),
-			"DEFVAR" => array("VAR"),
-			"CALL" => array("JUMPLABEL"),
+			"DEFVAR" => array("VARIABLE"),
+			"CALL" => array("LABEL"),
 			"RETURN" => array(),
 			"PUSHS" => array("SYMB"),
-			"POPS" => array("VAR"),
-			"ADD" => array("VAR", "SYMB", "SYMB"),
-			"SUB" => array("VAR", "SYMB", "SYMB"),
-			"MUL" => array("VAR", "SYMB", "SYMB"),
-			"IDIV" => array("VAR", "SYMB", "SYMB"),
-			"LT" => array("VAR", "SYMB", "SYMB"),
-			"GT" => array("VAR", "SYMB", "SYMB"),
-			"EQ" => array("VAR", "SYMB", "SYMB"),
-			"AND" => array("VAR", "SYMB", "SYMB"),
-			"OR" => array("VAR", "SYMB", "SYMB"),
-			"NOT" => array("VAR", "SYMB", "SYMB"),
-			"INT2CHAR" => array("VAR", "SYMB"),
-			"STR2INT" => array("VAR", "SYMB", "SYMB"),
-			"READ" => array("VAR", "CONSTANT"),
+			"POPS" => array("VARIABLE"),
+			"ADD" => array("VARIABLE", "SYMB", "SYMB"),
+			"SUB" => array("VARIABLE", "SYMB", "SYMB"),
+			"MUL" => array("VARIABLE", "SYMB", "SYMB"),
+			"IDIV" => array("VARIABLE", "SYMB", "SYMB"),
+			"LT" => array("VARIABLE", "SYMB", "SYMB"),
+			"GT" => array("VARIABLE", "SYMB", "SYMB"),
+			"EQ" => array("VARIABLE", "SYMB", "SYMB"),
+			"AND" => array("VARIABLE", "SYMB", "SYMB"),
+			"OR" => array("VARIABLE", "SYMB", "SYMB"),
+			"NOT" => array("VARIABLE", "SYMB", "SYMB"),
+			"INT2CHAR" => array("VARIABLE", "SYMB"),
+			"STR2INT" => array("VARIABLE", "SYMB", "SYMB"),
+			"READ" => array("VARIABLE", "CONSTANT"),
 			"WRITE" => array("SYMB"),
-			"CONCAT" => array("VAR", "SYMB", "SYMB"),
-			"STRLEN" => array("VAR", "SYMB"),
-			"GETCHAR" => array("VAR", "SYMB", "SYMB"),
-			"SETCHAR" => array("VAR", "SYMB", "SYMB"),
-			"TYPE" => array("VAR", "SYMB"),
-			"LABEL" => array("CONSTANT"),
-			"JUMP" => array("JUMPLABEL"),
-			"JUMPIFEQ" => array("VAR", "SYMB", "SYMB"),
-			"JUMPIFNEQ" => array("VAR", "SYMB", "SYMB"),
+			"CONCAT" => array("VARIABLE", "SYMB", "SYMB"),
+			"STRLEN" => array("VARIABLE", "SYMB"),
+			"GETCHAR" => array("VARIABLE", "SYMB", "SYMB"),
+			"SETCHAR" => array("VARIABLE", "SYMB", "SYMB"),
+			"TYPE" => array("VARIABLE", "SYMB"),
+			"LABEL" => array("LABEL"),
+			"JUMP" => array("LABEL"),
+			"JUMPIFEQ" => array("LABEL", "SYMB", "SYMB"),
+			"JUMPIFNEQ" => array("LABEL", "SYMB", "SYMB"),
 			"DPRINT" => array("SYMB"),
 			"BREAK" => array()
 		);
+
+		private $symbs = array("VARIABLE", "CONSTANT");
 
 		/**
 		 * @var Token[]
@@ -522,12 +524,29 @@
 			if (count($this->getRules($tokenArray[$start])) != $amount) {
 				throwException(21, "SYNTAX error analysis!", true);
 			} else {
-				echo "VSTUP: ".$tokenArray[$start]->getType()." - ".$tokenArray[$start]->getContent()."\n";
-				echo "PRAVIDLO: ";
-				print_r($this->getRules($tokenArray[$start]));
-				echo "\n";
-				for ($i = 1; $i < $amount; $i++) {
+				echo "Instrukce: ".$tokenArray[$start]->getType()." - ".$tokenArray[$start]->getContent()."\n";
+				$rules = $this->getRules($tokenArray[$start]);
+				for ($i = 0; $i <= ($amount-1); $i++) {
+					echo "Ocekavany argument: ".$rules[$i]."\n";
+					echo "ARGUMENT: ".$tokenArray[$start+$i+1]->getType()." - ".$tokenArray[$start+$i+1]->getContent()."\n"; // $i = 0 + 1 -> prvni argument, dalsi iterace cyklu
+					if ($rules[$i] == "VARIABLE" || $rules[$i] == "CONSTANT" || $rules[$i] == "LABEL") {
+						if ($rules[$i] == $tokenArray[$start+$i+1]->getType()) {
+							echo "OK\n";
+						} else {
+							throwException(21, "SYNTAX error analysis!", true);
+						}
+					} else if ($rules[$i] == "SYMB") {
+						if (in_array($tokenArray[$start+$i+1]->getType(), $this->symbs)) {
+							echo "OK\n";
+							// replace the type with
+						} else {
+							throwException(21, "SYNTAX error analysis!", true);
+						}
+					} else {
+						throwException(21, "SYNTAX error analysis!", true);
+					}
 				}
+
 			}
 
 
