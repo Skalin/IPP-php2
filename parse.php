@@ -524,21 +524,22 @@
 			if (count($this->getRules($tokenArray[$start])) != $amount) {
 				throwException(21, "SYNTAX error analysis!", true);
 			} else {
-				echo "Instrukce: ".$tokenArray[$start]->getType()." - ".$tokenArray[$start]->getContent()."\n";
 				$rules = $this->getRules($tokenArray[$start]);
-				for ($i = 0; $i <= ($amount-1); $i++) {
-					echo "Ocekavany argument: ".$rules[$i]."\n";
-					echo "ARGUMENT: ".$tokenArray[$start+$i+1]->getType()." - ".$tokenArray[$start+$i+1]->getContent()."\n"; // $i = 0 + 1 -> prvni argument, dalsi iterace cyklu
-					if ($rules[$i] == "VARIABLE" || $rules[$i] == "CONSTANT" || $rules[$i] == "LABEL") {
-						if ($rules[$i] == $tokenArray[$start+$i+1]->getType()) {
-							echo "OK\n";
+				for ($i = 0; $i <= ($amount - 1); $i++) {
+					if ($rules[$i] == "VARIABLE" || $rules[$i] == "LABEL") {
+						if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 						} else {
 							throwException(21, "SYNTAX error analysis!", true);
 						}
-					} else if ($rules[$i] == "SYMB") {
-						if (in_array($tokenArray[$start+$i+1]->getType(), $this->symbs)) {
-							echo "OK\n";
-							// TODO replace the type with type of constant  (int, string, bool)
+					} else if ($rules[$i] == "SYMB" || $rules[$i] == "CONSTANT") {
+						if (in_array($tokenArray[$start + $i + 1]->getType(), $this->symbs)) {
+							if ($tokenArray[$start + $i + 1]->getType() == "CONSTANT") {
+								$splitter = strpos($tokenArray[$start + $i + 1]->getContent(), "@");
+								$type = substr($tokenArray[$start + $i + 1]->getContent(), 0, $splitter);
+								$content = substr($tokenArray[$start + $i + 1]->getContent(), $splitter + 1);
+								$tokenArray[$start + $i + 1]->setType($type);
+								$tokenArray[$start + $i + 1]->setContent($content);
+							}
 						} else {
 							throwException(21, "SYNTAX error analysis!", true);
 						}
@@ -546,10 +547,7 @@
 						throwException(21, "SYNTAX error analysis!", true);
 					}
 				}
-
 			}
-
-
 			return true;
 		}
 
@@ -696,7 +694,7 @@
 	$syntax->analyse();
 
 	$xml = new XML($tokens);
-	echo $xml->generateXml();
+	//echo $xml->generateXml();
 
 
 	exit(0);
