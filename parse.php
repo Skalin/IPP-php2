@@ -393,6 +393,10 @@
 					$rowArray = explode(" ", $row);
 					$rowArray = $this->splitComments($rowArray);
 
+					if (preg_match('/\s+/', $line) == false) {
+						$this->setLoc(($this->getLoc()+1));
+					}
+
 					for ($i = 0; $i < count($rowArray); $i++) {
 						switch($rowArray[$i]) {
 							case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
@@ -411,7 +415,7 @@
 								// comments
 								$this->setComments($this->getComments()+1);
 								if ($i == 0) {
-									$this->setLoc($this->getLoc()-1);
+									$this->setLoc(($this->getLoc()-1));
 								}
 								break 2;
 							case (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
@@ -426,7 +430,6 @@
 						}
 					}
 					array_push($this->tokenArray, new Token("NEWLINE"));
-					$this->setLoc($this->getLoc()+1);
 				}
 			}
 			return $this->tokenArray;
@@ -479,6 +482,9 @@
 			"BREAK" => array()
 		);
 
+		/**
+		 * @var array
+		 */
 		private $symbs = array("VARIABLE", "CONSTANT");
 
 		/**
@@ -515,6 +521,21 @@
 			return $cleanedArray;
 		}
 
+
+		/**
+		 * @param Token[] $tokenArray
+		 * @param $start
+		 */
+		private function getAmountOfArguments($tokenArray, $start) {
+			$amount = 0;
+			$i = $start+1; // $start = INSTRUCTION, +1 starts arguments
+			while ($tokenArray[$i]->getType() != "NEWLINE") {
+				$amount++;
+				$i++;
+			}
+			return $amount;
+		}
+
 		/**
 		 * @param Token[] $tokenArray
 		 * @param $start
@@ -522,9 +543,8 @@
 		 * @return bool
 		 */
 		private function checkArguments($tokenArray, $start, $amount) {
-
-			// TODO změna počítání do newline v token array, protože $amount je aktualne to same jako pocet pravidel z getRules()
-			if (count($this->getRules($tokenArray[$start])) != $amount) {
+			$amountOfArguments = $this->getAmountOfArguments($tokenArray, $start);
+			if ($amountOfArguments != $amount) {
 				return false;
 			} else {
 				$rules = $this->getRules($tokenArray[$start]);
@@ -563,7 +583,7 @@
 
 			for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
 				if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
-					$amountOfArguments = $this->getAmountOfArguments($this->arrayOfTokens[$i]);
+					$amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i]);
 					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
 						throwException(21, "SYNTAX error analysis!", true);
 					}
@@ -590,7 +610,7 @@
 		/**
 		 * @param $token
 		 */
-		private function getAmountOfArguments(Token $inputToken) {
+		private function getAmountOfRules(Token $inputToken) {
 
 			foreach ($this->syntaxRules as $key => $rules) {
 				if ($key == $inputToken->getContent()) {
@@ -625,9 +645,11 @@
 		 * @param $string
 		 */
 		private function convertStringLiterals($string) {
-			str_replace("<", "&lt;", $string);
-			str_replace(">", "&gt;", $string);
-			str_replace("&", "&amp;", $string);
+			$newString = $string;
+			str_replace("<", "&lt;", $newString);
+			str_replace(">", "&gt;", $newString);
+			str_replace("&", "&amp;", $newString);
+			return $newString;
 		}
 
 		/**
@@ -653,7 +675,7 @@
 							$arg = "arg".$argumentIterator;
 							$xmlArgument = $xmlInstruction->addChild($arg);
 							$xmlArgument->addAttribute('type', $instructions[$i]->getType());
-							$xmlArgument[0] = $instructions[$i]->getContent();
+							$xmlArgument[0] = $this->convertStringLiterals($instructions[$i]->getContent());
 							$argumentIterator++;
 						}
 					}
@@ -682,8 +704,17 @@
 
 	$tokens = $lex->analyse();
 
+	$syntax = new Syntax($tokens);
+	$syntax->analyse();
+
+	$xml = new XML($tokens);
+
+
+	echo $xml->generateXml();
+
+
 	if ($parser->getSF()) {
-		$stats = "";
+		$stats = "\n\n\n";
 		if ($parser->getLF()) {
 			$stats = $stats.$lex->getLoc()."\n";
 		}
@@ -694,12 +725,5 @@
 
 		// TODO saving into file
 	}
-
-	$syntax = new Syntax($tokens);
-	$syntax->analyse();
-
-	$xml = new XML($tokens);
-	echo $xml->generateXml();
-
 
 	exit(0);
