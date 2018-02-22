@@ -732,10 +732,9 @@
 		 * @return string
 		 */
 		private function convertStringLiterals($string) {
-			$newString = $string;
-			str_replace("<", "&lt;", $newString);
-			str_replace(">", "&gt;", $newString);
-			str_replace("&", "&amp;", $newString);
+			$newString = str_replace("<", "&lt;", $string);
+			$newString = str_replace(">", "&gt;", $newString);
+			$newString = str_replace("&", "&amp;", $newString);
 			return $newString;
 		}
 
