@@ -403,7 +403,7 @@
 								$token = new Token("VARIABLE", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
-							case (preg_match('/^(string|bool|int)@[%|_|-|\$|&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
+							case (preg_match('/^(string|bool|int)@[\%|\_|\-|\$|\&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
 								$token = new Token("CONSTANT", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
@@ -419,6 +419,8 @@
 								array_push($this->tokenArray, $token);
 								break;
 							default:
+								// TODO remove todo
+								echo $rowArray[$i]."\n";
 								throwException(21, "LEX ERROR Analysis!",true);
 								break;
 						}
@@ -533,7 +535,7 @@
 							return false;
 						}
 					} else if ($rules[$i] == "SYMB" || $rules[$i] == "CONSTANT") {
-						if (in_array($tokenArray[$start + $i + 1]->getType(), $this->symbs)) {
+						if (in_array($tokenArray[$start + $i + 1]->getType(), $this->symbs) || $tokenArray[$start+$i+1]->getType() == "CONSTANT") {
 							if ($tokenArray[$start + $i + 1]->getType() == "CONSTANT") {
 								$splitter = strpos($tokenArray[$start + $i + 1]->getContent(), "@");
 								$type = substr($tokenArray[$start + $i + 1]->getContent(), 0, $splitter);
