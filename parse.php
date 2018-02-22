@@ -51,6 +51,10 @@
 		 * @var string
 		 */
 		private $statsFile;
+		/**
+		 * @var string
+		 */
+		private $first;
 
 		/**
 		 * Parser constructor.
@@ -61,6 +65,20 @@
 			$this->sF = false;
 			$this->lF = false;
 			$this->cF = false;
+		}
+
+		/**
+		 * @return string
+		 */
+		public function getFirst() {
+			return $this->first;
+		}
+
+		/**
+		 * @param string $first
+		 */
+		public function setFirst($first) {
+			$this->first = $first;
 		}
 
 		/**
@@ -119,8 +137,6 @@
 			$this->cF = $cF;
 		}
 
-
-
 		/**
 		 * @return string
 		 */
@@ -134,7 +150,6 @@
 		public function setStatsFile($statsFile) {
 			$this->statsFile = $statsFile;
 		}
-
 
 		/*
 		 * Function is reading the text from STDIN
@@ -180,8 +195,14 @@
 						$this->setStatsFile(substr($argv[$i], 8));
 					} else if (preg_match("/--loc/", $argv[$i]) == 1) {
 						$this->setLF(true);
+						if($this->getFirst() == "") {
+							$this->setFirst("L");
+						}
 					} else if (preg_match("/--comments/", $argv[$i]) == 1) {
 						$this->setCF(true);
+						if($this->getFirst() == "") {
+							$this->setFirst("C");
+						}
 					} else {
 						throwException(10, "Wrong usage of arguments!", true);
 					}
@@ -192,16 +213,10 @@
 					throwException(10, "Wrong usage of arguments!", true);
 				} else if ($this->getSF() && $this->getStatsFile() == "") {
 					throwException(10, "Wrong stats file location!", true);
+				} else if ($this->getSF() && (!$this->getCF() && !$this->getLF())) {
+					throwException(10, "Wrong usage of arguments!", true);
 				}
 			}
-
-			echo "Help: ".$this->getHF()."\n";
-			echo "Stats: ".$this->getSF()."\n";
-			if ($this->getSF()) {
-				echo "File Location: ".$this->getStatsFile()."\n";
-			}
-			echo "Loc: ".$this->getLF()."\n";
-			echo "Comments: ".$this->getCF()."\n";
 		}
 	}
 
@@ -270,23 +285,17 @@
 		 * @var int
 		 */
 		private $comments;
-		/**
-		 * @var int
-		 */
-		private $loc;
 
 		/**
 		 * @var
 		 */
 		private $arrayOfLines;
-		/**
-		 * @var
-		 */
-		private $statsFlag;
+
 		/**
 		 * @var array
 		 */
 		private $tokenArray;
+
 		/**
 		 * @var array
 		 */
@@ -300,11 +309,9 @@
 		 * Lex constructor.
 		 *
 		 * @param $arrayOfLines
-		 * @param $statsFlag
 		 */
-		public function __construct($arrayOfLines, $statsFlag) {
+		public function __construct($arrayOfLines) {
 			$this->arrayOfLines = $arrayOfLines;
-			$this->statsFlag = $statsFlag;
 			$this->tokenArray = array();
 			$this->comments = 0;
 		}
@@ -312,7 +319,7 @@
 		/**
 		 * @return mixed
 		 */
-		public function getComments() {
+		public function getAmountOfComments() {
 			return $this->comments;
 		}
 
@@ -388,13 +395,13 @@
 								$token = new Token("VARIABLE", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
-							case (preg_match('/^(string|bool|int)@[\%|\_|\-|\$|\&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
+							case (preg_match('/^(string|bool|int)@[\%|\_|\-|\+|\$|\&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
 								$token = new Token("CONSTANT", $rowArray[$i]);
 								array_push($this->tokenArray, $token);
 								break;
 							case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
 								// comments
-								$this->setComments($this->getComments()+1);
+								$this->setComments($this->getAmountOfComments()+1);
 								break 2;
 							case (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 								$token = new Token("LABEL", $rowArray[$i]);
@@ -481,6 +488,7 @@
 
 		/**
 		 * @param Token[] $arrayOfTokens
+		 * @return array
 		 */
 		private function cleanDuplicateNewLines($arrayOfTokens) {
 			$cleanedArray = array();
@@ -503,6 +511,7 @@
 		/**
 		 * @param Token[] $tokenArray
 		 * @param $start
+		 * @return integer
 		 */
 		private function getAmountOfArguments($tokenArray, $start) {
 			$amount = 0;
@@ -586,16 +595,110 @@
 
 
 		/**
-		 * @param $token
+		 * @param Token $inputToken
+		 * @return integer
 		 */
-		private function getAmountOfRules(Token $inputToken) {
+		private function getAmountOfRules($inputToken) {
 
 			foreach ($this->syntaxRules as $key => $rules) {
-				if ($key == $inputToken->getContent()) {
+				if ($inputToken->getContent() == $key) {
 					return count($rules);
 				}
 			}
 			return -1;
+		}
+	}
+
+
+	/**
+	 * Class Stats
+	 */
+	class Stats {
+
+		/**
+		 * @var
+		 */
+		private $file;
+		/**
+		 * @var
+		 */
+		private $flags;
+		/**
+		 * @var
+		 */
+		private $first;
+
+		/**
+		 * @param $statsFile
+		 * @param array $arrayOfFlags
+		 * @param $first
+		 */
+		public function __construct($statsFile, $arrayOfFlags, $first) {
+			$this->file = $statsFile;
+			$this->flags = $arrayOfFlags;
+			$this->first = $first;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getFile() {
+			return $this->file;
+		}
+
+		/**
+		 * @param mixed $file
+		 */
+		public function setFile($file) {
+			$this->file = $file;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getFlags() {
+			return $this->flags;
+		}
+
+		/**
+		 * @param mixed $flags
+		 */
+		public function setFlags($flags) {
+			$this->flags = $flags;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getFirst() {
+			return $this->first;
+		}
+
+		/**
+		 * @param mixed $first
+		 */
+		public function setFirst($first) {
+			$this->first = $first;
+		}
+
+		/**
+		 * @param $amountOfLinesOfCode
+		 * @param $amountOfComents
+		 */
+		public function saveToFile($amountOfLinesOfCode, $amountOfComents) {
+
+			if ($this->getFlags()[0] && $this->getFlags()[1]) {
+				$this->getFirst() == "L" ? $string = $amountOfLinesOfCode."\n".$amountOfComents : $string = $amountOfComents."\n".$amountOfLinesOfCode;
+			} else if ($this->getFlags()[0] && !($this->getFlags()[1])) {
+				$string = $amountOfLinesOfCode;
+			} else if (!($this->getFlags()[0]) && $this->getFlags()[1]) {
+				$string = $amountOfComents;
+			} else {
+				$string = "";
+			}
+			if (file_put_contents($this->getFile(), $string) == FALSE) {
+				throwException(12, "ERROR while saving to file: ".$this->getFile(), true);
+			}
 		}
 	}
 
@@ -626,6 +729,7 @@
 
 		/**
 		 * @param $string
+		 * @return string
 		 */
 		private function convertStringLiterals($string) {
 			$newString = $string;
@@ -635,12 +739,15 @@
 			return $newString;
 		}
 
+		/**
+		 * @param $amount
+		 */
 		private function setAmountOfInstructions($amount) {
 			$this->amountOfInstructions = $amount;
 		}
 
 		/**
-		 * @return mixed
+		 * @return integer
 		 */
 		public function getAmountOfInstructions() {
 			return $this->amountOfInstructions;
@@ -695,7 +802,7 @@
 	$parser->printHelp();
 
 	$arrayOfLines = $parser->readFromStdinToInput();
-	$lex = new Lex($arrayOfLines, true);
+	$lex = new Lex($arrayOfLines);
 
 	$tokens = $lex->analyse();
 
@@ -704,21 +811,11 @@
 
 	$xml = new XML($tokens);
 
+	if ($parser->getSF()) {
+		$stats = new Stats($parser->getStatsFile(), array($parser->getLF(), $parser->getCF()), $parser->getFirst());
+		$stats->saveToFile($xml->getAmountOfInstructions(), $lex->getAmountOfComments());
+	}
 
 	echo $xml->generateXml();
-
-
-	if ($parser->getSF()) {
-		$stats = "";
-		if ($parser->getLF()) {
-			$stats = $stats.$xml->getAmountOfInstructions()."\n";
-		}
-		if ($parser->getCF()) {
-			$stats = $stats.$lex->getComments()."\n";
-		}
-		echo $stats;
-
-		// TODO saving into file
-	}
 
 	exit(0);
