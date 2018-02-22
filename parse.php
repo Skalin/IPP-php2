@@ -307,7 +307,6 @@
 			$this->statsFlag = $statsFlag;
 			$this->tokenArray = array();
 			$this->comments = 0;
-			$this->loc = 0;
 		}
 
 		/**
@@ -322,20 +321,6 @@
 		 */
 		private function setComments($comments) {
 			$this->comments = $comments;
-		}
-
-		/**
-		 * @return int
-		 */
-		public function getLoc() {
-			return $this->loc;
-		}
-
-		/**
-		 * @param int $loc
-		 */
-		public function setLoc($loc) {
-			$this->loc = $loc;
 		}
 
 		/**
@@ -393,10 +378,6 @@
 					$rowArray = explode(" ", $row);
 					$rowArray = $this->splitComments($rowArray);
 
-					if (preg_match('/\s+/', $line) == false) {
-						$this->setLoc(($this->getLoc()+1));
-					}
-
 					for ($i = 0; $i < count($rowArray); $i++) {
 						switch($rowArray[$i]) {
 							case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
@@ -414,9 +395,6 @@
 							case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
 								// comments
 								$this->setComments($this->getComments()+1);
-								if ($i == 0) {
-									$this->setLoc(($this->getLoc()-1));
-								}
 								break 2;
 							case (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 								$token = new Token("LABEL", $rowArray[$i]);
@@ -633,6 +611,11 @@
 		private $instructions;
 
 		/**
+		 * @var
+		 */
+		private $amountOfInstructions;
+
+		/**
 		 * XML constructor.
 		 *
 		 * @param $instructions
@@ -652,6 +635,17 @@
 			return $newString;
 		}
 
+		private function setAmountOfInstructions($amount) {
+			$this->amountOfInstructions = $amount;
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getAmountOfInstructions() {
+			return $this->amountOfInstructions;
+		}
+
 		/**
 		 * @return mixed
 		 */
@@ -659,16 +653,16 @@
 			$instructions = $this->instructions;
 			$xmlProgram = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."<program></program>");
 			$i = 0;
-			$instructionIterator = 1;
+			$instructionIterator = 0;
 			$argumentIterator = 1;
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
 					if ($instructions[$i]->getType() == "PROGRAM") {
 						$xmlProgram->addAttribute('language', $instructions[0]->getContent());
 					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
+						$instructionIterator++;
 						$xmlInstruction = $xmlProgram->addChild('instruction');
 						$xmlInstruction->addAttribute('order', $instructionIterator);
-						$instructionIterator++;
 						$xmlInstruction->addAttribute('opcode', $instructions[$i]->getContent());
 					} else {
 						if (isset($xmlInstruction)) {
@@ -689,6 +683,7 @@
 					$argumentIterator = 1;
 				}
 			}
+			$this->setAmountOfInstructions($instructionIterator);
 			return $xmlProgram->asXML();
 		}
 	}
@@ -714,9 +709,9 @@
 
 
 	if ($parser->getSF()) {
-		$stats = "\n\n\n";
+		$stats = "";
 		if ($parser->getLF()) {
-			$stats = $stats.$lex->getLoc()."\n";
+			$stats = $stats.$xml->getAmountOfInstructions()."\n";
 		}
 		if ($parser->getCF()) {
 			$stats = $stats.$lex->getComments()."\n";
