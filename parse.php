@@ -538,7 +538,7 @@
 					} else if ($rules[$i] == "SYMB") {
 						if (in_array($tokenArray[$start+$i+1]->getType(), $this->symbs)) {
 							echo "OK\n";
-							// replace the type with
+							// TODO replace the type with type of constant  (int, string, bool)
 						} else {
 							throwException(21, "SYNTAX error analysis!", true);
 						}
