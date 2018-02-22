@@ -641,9 +641,9 @@
 			$argumentIterator = 1;
 			while ($i < count($instructions)) {
 				if ($instructions[$i]->getType() != "NEWLINE") {
-					echo "NOT NEW LINE\n";
+					//echo "NOT NEW LINE\n";
 					if ($instructions[$i]->getType() == "PROGRAM") {
-						$xmlProgram->addAttribute('language', $instructions[0]);
+						$xmlProgram->addAttribute('language', $instructions[0]->getContent());
 					} else if ($instructions[$i]->getType() == "INSTRUCTION") {
 						$xmlInstruction = $xmlProgram->addChild('instruction');
 						$xmlInstruction->addAttribute('order', $instructionIterator);
@@ -692,14 +692,11 @@
 		echo $stats;
 	}
 
-	//var_dump($tokens);
-
 	$syntax = new Syntax($tokens);
 	$syntax->analyse();
 
 	$xml = new XML($tokens);
-	//$xml->generateXml();
+	echo $xml->generateXml();
 
-	//var_dump($tokens);
 
 	exit(0);
