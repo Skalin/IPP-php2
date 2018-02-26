@@ -383,12 +383,16 @@ class Lex {
 					switch($rowArray[$i]) {
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
 							if (preg_match('/(INSTRUCTION\.)(CALL|LABEL|JUMP|JUMPIFEQ|JUMPIFNEQ)/', $previousToken) == true) {
-								$token = new Token("LABEL", $rowArray[$i]);
+								if (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
+									$token = new Token("LABEL", $rowArray[$i]);
+								} else {
+									throwException(21, "LEX error analysis", true);
+								}
 							} else {
 								$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
 							}
 							array_push($this->tokenArray, $token);
-							$previousToken = $token->getContent().".".$token->getType();
+							$previousToken = $token->getType().".".$token->getContent();
 							break;
 						case (preg_match('/^(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("VARIABLE", $rowArray[$i]);
@@ -535,6 +539,8 @@ class Syntax {
 				if ($rules[$i] == "VARIABLE" || $rules[$i] == "LABEL") {
 					if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 					} else {
+						echo "Dostal jsem: ".$tokenArray[$start+$i+1]->getType()."\n";
+						echo "CHCI: ".$rules[$i]."\n";
 						return false;
 					}
 				} else if ($rules[$i] == "SYMB" || $rules[$i] == "CONSTANT") {
