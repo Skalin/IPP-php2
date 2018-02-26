@@ -334,7 +334,7 @@ class Lex {
 	/**
 	 * @param mixed $comments
 	 */
-	private function setComments($comments) {
+	private function setAmountOfComments($comments) {
 		$this->comments = $comments;
 	}
 
@@ -413,7 +413,7 @@ class Lex {
 							break;
 						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
 							// comments
-							$this->setComments($this->getAmountOfComments()+1);
+							$this->setAmountOfComments($this->getAmountOfComments()+1);
 							break 2;
 						case (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("LABEL", $rowArray[$i]);
