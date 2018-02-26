@@ -378,11 +378,17 @@ class Lex {
 				$row = preg_replace('/\s+/', ' ',$line);
 				$rowArray = explode(" ", $row);
 				$rowArray = $this->splitComments($rowArray);
+				$previousToken = "";
 				for ($i = 0; $i < count($rowArray); $i++) {
 					switch($rowArray[$i]) {
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
-							$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
+							if (preg_match('/(INSTRUCTION\.)(CALL|LABEL|JUMP|JUMPIFEQ|JUMPIFNEQ)/', $previousToken) == true) {
+								$token = new Token("LABEL", $rowArray[$i]);
+							} else {
+								$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
+							}
 							array_push($this->tokenArray, $token);
+							$previousToken = $token->getContent().".".$token->getType();
 							break;
 						case (preg_match('/^(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("VARIABLE", $rowArray[$i]);
