@@ -176,6 +176,16 @@ class Parser {
 	 */
 	public function printHelp() {
 		if ($this->getHF()) {
+			echo "parse.php - lexikalni a syntakticky analyzator v jazyce PHP 5.6\n";
+			echo "Autor: Dominik Skala (xskala11)\n";
+			echo "Predmet: IPP 2018\n";
+			echo "Lexikalni a syntakticky analyzator jazyka IPPcode18. Nacita ze standardniho vstupu zdrojovy kod v IPPcode18, zkontroluje lexikalni a syntaktickou spravnost kodu a vypise na standardni vystup XML reprezentaci programu.\n";
+			echo "Implementovana rozsireni: STATS\n\n";
+			echo "Argumenty:\n";
+			echo "\t--help\t\t\tTiskne tuto napovedu, nenacita zadny vstup. Nelze kombinovat s dalsimi argumenty.\n";
+			echo "\t--stats=file\t\tUklada statistiky o zdrojovem kodu, ktere se sbiraji behem syntakticke a lexikalni analyzy. Vyzaduje alespon jeden z nasledujicich argumentu.\n";
+			echo "\t--loc\t\t\tUklada statistiky po poctu radku s instrukcemi. Nepocitaji se prazdne radky nebo radky obsahujici pouze komentar.\n";
+			echo "\t--comments\t\tUklada statistiky o poctu komentaru. Kazdy radek na kterem se nalezne komentar, je zapocitan.\n";
 			exit(0);
 		}
 	}
