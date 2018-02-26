@@ -176,7 +176,6 @@ class Parser {
 	 */
 	public function printHelp() {
 		if ($this->getHF()) {
-			echo "Napoveda\n";
 			exit(0);
 		}
 	}
@@ -372,7 +371,7 @@ class Lex {
 				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
 				array_push($this->tokenArray, $token);
 			} else {
-				throwException(21, "LEX ERROR Analysis!",true);
+				throwException(21, "LEX error analysis!",true);
 			}
 			foreach ($this->arrayOfLines as $line) {
 				$row = preg_replace('/\s+/', ' ',$line);
@@ -386,7 +385,7 @@ class Lex {
 								if (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
 									$token = new Token("LABEL", $rowArray[$i]);
 								} else {
-									throwException(21, "LEX error analysis", true);
+									throwException(21, "LEX error analysis!", true);
 								}
 							} else {
 								$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
@@ -411,14 +410,15 @@ class Lex {
 							array_push($this->tokenArray, $token);
 							break;
 						default:
-							// TODO remove todo
-							echo $rowArray[$i]."\n";
-							throwException(21, "LEX ERROR Analysis!",true);
+							//TODO check other types and values
+							throwException(21, "LEX error analysis!",true);
 							break;
 					}
 				}
 				array_push($this->tokenArray, new Token("NEWLINE"));
 			}
+		} else {
+			throwException(10, "LEX error analysis! Empty input!", true);
 		}
 		return $this->tokenArray;
 	}
@@ -539,8 +539,6 @@ class Syntax {
 				if ($rules[$i] == "VARIABLE" || $rules[$i] == "LABEL") {
 					if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 					} else {
-						echo "Dostal jsem: ".$tokenArray[$start+$i+1]->getType()."\n";
-						echo "CHCI: ".$rules[$i]."\n";
 						return false;
 					}
 				} else if ($rules[$i] == "SYMB" || $rules[$i] == "CONSTANT") {
@@ -570,11 +568,18 @@ class Syntax {
 		$this->arrayOfTokens = $this->cleanDuplicateNewLines($this->arrayOfTokens);
 		for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
 			if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
-				$amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i]);
-				if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
+				if (($amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i])) < 0) {
 					throwException(21, "SYNTAX error analysis!", true);
+				} else {
+					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
+						throwException(21, "SYNTAX error analysis!", true);
+					}
+					$i += $amountOfArguments;
 				}
-				$i += $amountOfArguments;
+			} else if ($this->arrayOfTokens[$i]->getType() == "NEWLINE" || $this->arrayOfTokens[$i]->getType() == "PROGRAM") {
+				continue;
+			} else {
+				throwException(21, "SYNTAX error analysis!", true);
 			}
 		}
 	}
@@ -693,7 +698,7 @@ class Stats {
 			$string = "";
 		}
 		if (file_put_contents($this->getFile(), $string) == FALSE) {
-			throwException(12, "ERROR while saving to file: ".$this->getFile(), true);
+			throwException(12, "error while saving to file: ".$this->getFile()."!", true);
 		}
 	}
 }
@@ -797,8 +802,8 @@ $parser->parseArguments($argc, $argv);
 $parser->printHelp();
 
 $arrayOfLines = $parser->readFromStdinToInput();
-$lex = new Lex($arrayOfLines);
 
+$lex = new Lex($arrayOfLines);
 $tokens = $lex->analyse();
 
 $syntax = new Syntax($tokens);
