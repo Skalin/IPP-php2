@@ -142,12 +142,16 @@ class Test {
 	private $name;
 	private $erc;
 	private $testStatus;
+	private $parser;
+	private $interpret;
 
 	private $testResults = array("IGNORE", "SUCCESS", "FAIL");
 
-	public function __construct($name) {
+	public function __construct($name, $parser, $interpret) {
 		$this->name = $name;
 		$this->testStatus = $this->testResults[0];
+		$this->parser = $parser;
+		$this->interpret = $interpret;
 	}
 
 	/**
@@ -175,7 +179,7 @@ class Test {
 	 * @param mixed $erc
 	 */
 	public function setErc($erc) {
-		$this->erc = $erc;
+		$this->erc = intval($erc);
 	}
 
 	/**
@@ -192,6 +196,47 @@ class Test {
 		$this->testStatus = $testStatus;
 	}
 
+	/**
+	 * @return mixed
+	 */
+	public function getParser() {
+		return $this->parser;
+	}
+
+	/**
+	 * @param mixed $parser
+	 */
+	public function setParser($parser) {
+		$this->parser = $parser;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getInterpret() {
+		return $this->interpret;
+	}
+
+	/**
+	 * @param mixed $interpret
+	 */
+	public function setInterpret($interpret) {
+		$this->interpret = $interpret;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getTestResults() {
+		return $this->testResults;
+	}
+
+	/**
+	 * @param array $testResults
+	 */
+	public function setTestResults($testResults) {
+		$this->testResults = $testResults;
+	}
 
 
 	private function inFileExists() {
@@ -240,6 +285,10 @@ class Test {
 		return $read;
 	}
 
+	private function compareReturnCode($returnCode) {
+		return ($this->getErc() == $returnCode ? true : false);
+	}
+
 	public function testBehavior() {
 		if (!$this->inFileExists()) {
 			$this->generateInFile();
@@ -252,6 +301,21 @@ class Test {
 		}
 
 		$this->setErc($this->loadErcFromFile());
+
+
+		$returnVal = 0;
+		exec('php -f'.$this->getParser().' < '.$this->getName().".src", $output, $returnVal);
+
+		if ($returnVal != 0) {
+			if (!$this->compareReturnCode($returnVal)) {
+				$this->setTestStatus($this->testResults[2]);
+			}
+		}
+
+		$xml = implode($output, "\n");
+
+		echo $xml;
+
 	}
 
 }
@@ -260,8 +324,8 @@ class Test {
 $common = new Common ($argc, $argv);
 $common->parseArguments();
 
-$test = new Test("./tests/test");
+$test = new Test("./tests/test", $common->getParsePath(), $common->getInterpretPath());
 $test->testBehavior();
 
 
-echo exec("php ".$common->getParsePath()." <<.IPPcode18");
+exit(0);
