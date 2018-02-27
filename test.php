@@ -140,48 +140,118 @@ class Common {
 
 class Test {
 	private $name;
-	private $returnCode;
-	private $something;
+	private $erc;
+	private $testStatus;
 
+	private $testResults = array("IGNORE", "SUCCESS", "FAIL");
 
-	public function __construct($name, $returnCode) {
-
+	public function __construct($name) {
+		$this->name = $name;
+		$this->testStatus = $this->testResults[0];
 	}
 
+	/**
+	 * @return mixed
+	 */
+	public function getName() {
+		return $this->name;
+	}
+
+	/**
+	 * @param mixed $name
+	 */
+	public function setName($name) {
+		$this->name = $name;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getErc() {
+		return $this->erc;
+	}
+
+	/**
+	 * @param mixed $erc
+	 */
+	public function setErc($erc) {
+		$this->erc = $erc;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getTestStatus() {
+		return $this->testStatus;
+	}
+
+	/**
+	 * @param mixed $testStatus
+	 */
+	public function setTestStatus($testStatus) {
+		$this->testStatus = $testStatus;
+	}
+
+
+
 	private function inFileExists() {
-		if ((file_exists($this->name.".in") && (is_dir($this->name.".in"))) || (!file_exists($this->name.".in"))) {
-			$this->generateInFile();
+		if ((file_exists($this->getName().".in") && (is_dir($this->getName().".in"))) || (!file_exists($this->getName().".in"))) {
+			return false;
 		}
+		return true;
 	}
 
 	private function outFileExists() {
-		if ((file_exists($this->name.".out") && (is_dir($this->name.".out"))) || (!file_exists($this->name.".out"))) {
-			$this->generateOutFile();
+		if ((file_exists($this->getName().".out") && (is_dir($this->getName().".out"))) || (!file_exists($this->getName().".out"))) {
+			return false;
 		}
+		return true;
 	}
 
 	private function rcFileExists() {
-		if ((file_exists($this->name.".rc") && (is_dir($this->name.".rc"))) || (!file_exists($this->name.".rc"))) {
-			$this->generateRcFile();
+		if ((file_exists($this->getName().".rc") && (is_dir($this->getName().".rc"))) || (!file_exists($this->getName().".rc"))) {
+			return false;
 		}
+		return true;
 	}
 
 	private function generateInFile() {
-		if (file_put_contents($this->name.".in", "") == false) {
+		if ((file_put_contents($this->getName().".in", "\0")) == false) {
 			throwException(12, "ERROR writing file", true);
 		}
 	}
 
 	private function generateOutFile() {
-		if (file_put_contents($this->name.".out", "") == false) {
+		if ((file_put_contents($this->getName().".out", "\0")) == false) {
 			throwException(12, "ERROR writing file", true);
 		}
 	}
 
 	private function generateRcFile() {
-		if (file_put_contents($this->name.".rc", "0") == false) {
+		if ((file_put_contents($this->getName().".rc", "0\0")) == false) {
 			throwException(12, "ERROR writing file", true);
 		}
+	}
+
+	private function loadErcFromFile() {
+		if (($read = file_get_contents($this->getName().".rc")) == false) {
+			throwException(12, "ERROR reading file", true);
+		}
+		return $read;
+	}
+
+	public function testBehavior() {
+		if (!$this->inFileExists()) {
+			$this->generateInFile();
+		}
+		if (!$this->outFileExists()) {
+			$this->generateOutFile();
+		}
+		if (!$this->rcFileExists()) {
+			$this->generateRcFile();
+		}
+
+		$this->setErc($this->loadErcFromFile());
 	}
 
 }
@@ -190,8 +260,8 @@ class Test {
 $common = new Common ($argc, $argv);
 $common->parseArguments();
 
-if (scandir($common->getDirPath()) != false) {
-	var_dump(scandir($common->getDirPath()));
-} else {
-	throwException(11, "ERROR opening file".$common->getDirPath(), true);
-}
+$test = new Test("./tests/test");
+$test->testBehavior();
+
+
+echo exec("php ".$common->getParsePath()." <<.IPPcode18");
