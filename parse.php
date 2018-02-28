@@ -15,12 +15,12 @@ $fileName = "parse.php";
  *
  * @param int $errorCode selector of type of error
  * @param string $errorText Depending on this value function selects which type i will echo
- * @param bool $talkative value selects whether to echo error or not.
+ * @param bool $verbose value selects whether to echo error or not.
  */
 
-function throwException($errorCode, $errorText, $talkative) {
+function throwException($errorCode, $errorText, $verbose) {
 	global $fileName;
-	if ($talkative) {
+	if ($verbose) {
 		fwrite(STDERR, "ERROR: ".$errorText."\n");
 		fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$fileName." --help\n");
 	}
