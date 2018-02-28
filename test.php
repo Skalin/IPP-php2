@@ -591,6 +591,8 @@ class HtmlGenerator extends Singleton {
 		$statsHtml = "<p>Bylo provedeno ".$amountOfTests." testů. Z nichž bylo <span class='success'>".($amountOfSuccessfulTests*100)."% </span> (<span class='success'>".$successful."</span>) úspěšných a <span class='failed'>".($amountOfFailedTests*100)." %</span> (<span class='failed'>".$failed."</span>) neúspěšných</p>";
 
 		$output = $header.$innerHtmlHead.$innerHtmlBack.$statsHtml.$footer;
+
+		//TODO remove next line, we want only output to stdout..
 		file_put_contents("test.html", $output);
 		echo $output;
 	}
