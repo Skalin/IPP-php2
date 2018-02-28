@@ -311,7 +311,7 @@ class Test extends Singleton {
 	}
 }
 
-class TestBehavior {
+class TestBehavior extends Singleton {
 	private $testArray;
 	private $parser;
 	private $interpret;
@@ -359,6 +359,10 @@ class TestBehavior {
 		}
 	}
 
+	private function programExists($file) {
+		return (is_file($file) ? true : false);
+	}
+
 	/**
 	 *
 	 */
@@ -381,22 +385,30 @@ class TestBehavior {
 
 
 			$returnVal = 0;
-			echo "Running test: ".$test->getName()."\n";
-			exec('php -f '.$this->getParser().' < '.$test->getName().".src", $output, $returnVal);
+			if ($this->programExists($this->getParser())) {
+				exec('php -f '.$this->getParser().' < '.$test->getName().".src", $output, $returnVal);
+			} else {
+				$this->throwException(11, "Parser does not exist", true);
+			}
 
 			if ($returnVal != 0) {
 				if (!$test->compareReturnCode($returnVal)) {
 					$test->setTestStatus($this->testResults[2]);
+					return;
 				}
 			}
 
 			$xml = implode($output, "\n");
 
-			exec('python3 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
-
+			if ($this->programExists($this->getInterpret())) {
+				exec('python3 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
+			} else {
+				$this->throwException(11, "Interpret does not exist", true);
+			}
 			if ($returnVal != 0) {
 				if (!$test->compareReturnCode($returnVal)) {
 					$test->setTestStatus($this->testResults[2]);
+					return;
 				}
 			}
 
