@@ -74,7 +74,8 @@ class Common {
 		$this->dirPath = $dirPath;
 	}
 
-	/**
+	/** DOTA JE PRO MALY DECKA, LEAGUE OF LEGENDS TO JE PECKA
+	* LOOOOLKOOOOOOOO TOOO MAAAAM RAAAAAAD
 	 * @return bool
 	 */
 	public function isRF() {
