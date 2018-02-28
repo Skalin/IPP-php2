@@ -820,12 +820,9 @@ class XML extends Singleton {
 	}
 }
 
-
 $parser = new Parser();
-
 $parser->parseArguments($argc, $argv);
 $parser->printHelp();
-
 $arrayOfLines = $parser->readFromStdinToInput();
 
 $lex = new Lex($arrayOfLines);
@@ -835,7 +832,6 @@ $syntax = new Syntax($tokens);
 $syntax->analyse();
 
 $xml = new XML($tokens);
-
 $xmlOutput = $xml->generateXml();
 
 if ($parser->getSF()) {
