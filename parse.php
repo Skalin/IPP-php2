@@ -836,11 +836,13 @@ $syntax->analyse();
 
 $xml = new XML($tokens);
 
+$xmlOutput = $xml->generateXml();
+
 if ($parser->getSF()) {
 	$stats = new Stats($parser->getStatsFile(), array($parser->getLF(), $parser->getCF()), $parser->getFirst());
 	$stats->saveToFile($xml->getAmountOfInstructions(), $lex->getAmountOfComments());
 }
 
-echo $xml->generateXml();
+echo $xmlOutput;
 
 exit(0);
