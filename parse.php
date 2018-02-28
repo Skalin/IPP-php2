@@ -695,15 +695,15 @@ class Stats {
 
 	/**
 	 * @param $amountOfLinesOfCode
-	 * @param $amountOfComents
+	 * @param $amountOfComments
 	 */
-	public function saveToFile($amountOfLinesOfCode, $amountOfComents) {
+	public function saveToFile($amountOfLinesOfCode, $amountOfComments) {
 		if ($this->getFlags()[0] && $this->getFlags()[1]) {
-			$this->getFirst() == "L" ? $string = $amountOfLinesOfCode."\n".$amountOfComents : $string = $amountOfComents."\n".$amountOfLinesOfCode;
+			$this->getFirst() == "L" ? $string = $amountOfLinesOfCode."\n".$amountOfComments."\n" : $string = $amountOfComments."\n".$amountOfLinesOfCode."\n";
 		} else if ($this->getFlags()[0] && !($this->getFlags()[1])) {
 			$string = $amountOfLinesOfCode;
 		} else if (!($this->getFlags()[0]) && $this->getFlags()[1]) {
-			$string = $amountOfComents;
+			$string = $amountOfComments;
 		} else {
 			$string = "";
 		}
