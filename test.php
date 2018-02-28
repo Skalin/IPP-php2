@@ -145,13 +145,9 @@ class Test {
 	private $parser;
 	private $interpret;
 
-	private $testResults = array("IGNORE", "SUCCESS", "FAIL");
 
-	public function __construct($name, $parser, $interpret) {
+	public function __construct($name) {
 		$this->name = $name;
-		$this->testStatus = $this->testResults[0];
-		$this->parser = $parser;
-		$this->interpret = $interpret;
 	}
 
 	/**
@@ -225,13 +221,6 @@ class Test {
 	}
 
 	/**
-	 * @return array
-	 */
-	public function getTestResults() {
-		return $this->testResults;
-	}
-
-	/**
 	 * @param array $testResults
 	 */
 	public function setTestResults($testResults) {
@@ -239,93 +228,207 @@ class Test {
 	}
 
 
-	private function inFileExists() {
+	public function inFileExists() {
 		if ((file_exists($this->getName().".in") && (is_dir($this->getName().".in"))) || (!file_exists($this->getName().".in"))) {
 			return false;
 		}
 		return true;
 	}
 
-	private function outFileExists() {
+	public function outFileExists() {
 		if ((file_exists($this->getName().".out") && (is_dir($this->getName().".out"))) || (!file_exists($this->getName().".out"))) {
 			return false;
 		}
 		return true;
 	}
 
-	private function rcFileExists() {
+	public function rcFileExists() {
 		if ((file_exists($this->getName().".rc") && (is_dir($this->getName().".rc"))) || (!file_exists($this->getName().".rc"))) {
 			return false;
 		}
 		return true;
 	}
 
-	private function generateInFile() {
+	public function generateInFile() {
 		if ((file_put_contents($this->getName().".in", "\0")) == false) {
 			throwException(12, "ERROR writing file", true);
 		}
 	}
 
-	private function generateOutFile() {
+	public function generateOutFile() {
 		if ((file_put_contents($this->getName().".out", "\0")) == false) {
 			throwException(12, "ERROR writing file", true);
 		}
 	}
 
-	private function generateRcFile() {
+	public function generateRcFile() {
 		if ((file_put_contents($this->getName().".rc", "0\0")) == false) {
 			throwException(12, "ERROR writing file", true);
 		}
 	}
 
-	private function loadErcFromFile() {
+	public function loadErcFromFile() {
 		if (($read = file_get_contents($this->getName().".rc")) == false) {
 			throwException(12, "ERROR reading file", true);
 		}
 		return $read;
 	}
 
-	private function compareReturnCode($returnCode) {
+	public function compareReturnCode($returnCode) {
 		return ($this->getErc() == $returnCode ? true : false);
 	}
+}
 
-	public function testBehavior() {
-		if (!$this->inFileExists()) {
-			$this->generateInFile();
-		}
-		if (!$this->outFileExists()) {
-			$this->generateOutFile();
-		}
-		if (!$this->rcFileExists()) {
-			$this->generateRcFile();
-		}
+class TestBehavior {
+	private $testArray = array();
+	private $parser;
+	private $interpret;
+	private $testResults = array("IGNORE", "SUCCESS", "FAIL");
 
-		$this->setErc($this->loadErcFromFile());
-
-
-		$returnVal = 0;
-		exec('php -f'.$this->getParser().' < '.$this->getName().".src", $output, $returnVal);
-
-		if ($returnVal != 0) {
-			if (!$this->compareReturnCode($returnVal)) {
-				$this->setTestStatus($this->testResults[2]);
-			}
-		}
-
-		$xml = implode($output, "\n");
-
-		echo $xml;
-
+	/**
+	 * TestBehavior constructor.
+	 *
+	 * @param array $testArray
+	 * @param $parser
+	 * @param $interpret
+	 */
+	public function __construct(array $testArray, $parser, $interpret) {
+		$this->testArray = $testArray;
+		$this->parser = $parser;
+		$this->interpret = $interpret;
 	}
 
+	/**
+	 * @return array
+	 */
+	private function getTestArray() {
+		return $this->testArray;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	private function getParser() {
+		return $this->parser;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	private function getInterpret() {
+		return $this->interpret;
+	}
+
+	private function compareOutput($expectedOutput, $givenOutput) {
+		if (strcmp($expectedOutput, $givenOutput) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 *
+	 */
+	public function testBehavior() {
+		foreach ($this->testArray as $test) {
+
+			$test->setTestStatus($this->testResults[0]);
+
+			if (!$test->inFileExists()) {
+				$test->generateInFile();
+			}
+			if (!$test->outFileExists()) {
+				$test->generateOutFile();
+			}
+			if (!$test->rcFileExists()) {
+				$test->generateRcFile();
+			}
+
+			$test->setErc($test->loadErcFromFile());
+
+
+			$returnVal = 0;
+			echo "Running test: ".$test->getName()."\n";
+			exec('php -f '.$this->getParser().' < '.$test->getName().".src", $output, $returnVal);
+
+			if ($returnVal != 0) {
+				if (!$test->compareReturnCode($returnVal)) {
+					$test->setTestStatus($this->testResults[2]);
+				}
+			}
+
+			$xml = implode($output, "\n");
+
+			exec('python3 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
+
+			if ($returnVal != 0) {
+				if (!$test->compareReturnCode($returnVal)) {
+					$test->setTestStatus($this->testResults[2]);
+				}
+			}
+
+			if (compareOutput(file_get_contents($test->getName()."out"), $output)) {
+				// TODO co delat kdyz je output false?
+
+			} else {
+			}
+		}
+	}
+
+}
+
+class TestDirectory {
+
+	private $recursive;
+	private $arrayOfTests = array();
+
+	public function __construct($recursive) {
+		$this->recursive = $recursive;
+	}
+
+	private function isRecursive() {
+		return $this->recursive ? true : false;
+	}
+
+	public function createTests($dir) {
+		if (($files = scandir($dir)) == false) {
+			throwException(10,"Directory is not a directory", true);
+		} else {
+			foreach ($files as $fd) {
+				if ($fd == "." || $fd == "..") {
+					continue;
+				}
+				if (is_dir($dir."/".$fd)) {
+					if ($this->isRecursive()) {
+						$this->createTests($dir."/".$fd);
+					} else {
+						continue;
+					}
+				} else {
+					if (preg_match('/.+\.src$/', $fd) == true) {
+						$test = new Test($dir."/".substr($fd, 0, strlen($fd)-4));
+						array_push($this->arrayOfTests, $test);
+					} else {
+						continue;
+					}
+				}
+			}
+		}
+		return $this->arrayOfTests;
+	}
 }
 
 
 $common = new Common ($argc, $argv);
 $common->parseArguments();
 
-$test = new Test("./tests/test", $common->getParsePath(), $common->getInterpretPath());
-$test->testBehavior();
+$testdir = new TestDirectory($common->isRF());
+$tests = $testdir->createTests($common->getDirPath());
+
+$testBehavior = new TestBehavior($tests, $common->getParsePath(), $common->getInterpretPath());
+$testBehavior->testBehavior();
+
 
 
 exit(0);
