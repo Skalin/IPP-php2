@@ -602,8 +602,8 @@ class HtmlGenerator extends Singleton {
 $common = new Common ($argc, $argv);
 $common->parseArguments();
 
-$testdir = new TestDirectory($common->isRF());
-$tests = $testdir->createTests($common->getDirPath());
+$testDir = new TestDirectory($common->isRF());
+$tests = $testDir->createTests($common->getDirPath());
 
 $testBehavior = new TestBehavior($tests, $common->getParsePath(), $common->getInterpretPath());
 $tests = $testBehavior->testBehavior();
