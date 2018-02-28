@@ -540,8 +540,8 @@ class HtmlGenerator extends Singleton {
 			
 			.failed {color: red;}
 			.success {color: darkgreen;}
-			.wideTd {width: 200px;}
-			.shortTd {width: 150px;}
+			.wideTd {width: 250px;}
+			.shortTd {width: 180px;}
 			
 			.left {text-align: left;}
 			.center {text-align: center;}
@@ -562,7 +562,7 @@ class HtmlGenerator extends Singleton {
 		$header .= "<p>Protokol o výsledku jednotlivých testů pro IPP 2018.</p>\n<h3>Adresář s testy: ".$this->getDirectory()."</h3>\n<h3>Parser: ".$this->getParser()."\n</h3>\n<h3>Interpret: ".$this->getInterpret()."</h3>";
 		$footer = "\n</body>\n</html>";
 
-		$innerHtmlHead = "<table>\n<tr><td>Testovací soubor</td><td class='wideTd right'>Výsledek testu</td><td class='shortTd center'>Návratový kód</td><td class='shortTd center'>Očekávaný návratový kód</td></tr>";
+		$innerHtmlHead = "<table>\n<tr><td>Testovací scénář</td><td class='wideTd right'>Výsledek testu</td><td class='shortTd center'>Návratový kód</td><td class='shortTd center'>Očekávaný návratový kód</td></tr>";
 
 		$failed = 0;
 		$successful = 0;
