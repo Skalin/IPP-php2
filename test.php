@@ -1,32 +1,47 @@
 <?php
 /**
  * Project: IPP
- * User: skalin
+ * User: Dominik Skala (xskala11)
  * Date: 20.2.18
  * Time: 16:11
  */
 
-$fileName = "test.php";
+class Singleton {
 
+	private $fileName = "test.php";
 
-/**
- * Function for throwing exceptions and stopping the script
- *
- * @param int $errorCode selector of type of error
- * @param string $errorText Depending on this value function selects which type i will echo
- * @param bool $verbose value selects whether to echo error or not.
- */
+	private function __construct() {
 
-function throwException($errorCode, $errorText, $verbose) {
-	global $fileName;
-	if ($verbose) {
-		fwrite(STDERR, "ERROR: ".$errorText."\n");
-		fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$fileName." --help\n");
 	}
-	exit($errorCode);
+
+	public static function Instance()
+	{
+		static $inst = null;
+		if ($inst === null) {
+			$inst = new Singleton();
+		}
+		return $inst;
+	}
+
+	/**
+	 * Function for throwing exceptions and stopping the script
+	 *
+	 * @param int $errorCode selector of type of error
+	 * @param string $errorText Depending on this value function selects which type i will echo
+	 * @param bool $verbose value selects whether to echo error or not.
+	 */
+
+	public function throwException($errorCode, $errorText, $verbose) {
+		if ($verbose) {
+			fwrite(STDERR, "ERROR: ".$errorText."\n");
+			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$this->fileName." --help\n");
+		}
+		exit($errorCode);
+	}
 }
 
-class Common {
+
+class Common extends Singleton {
 
 	private $argumentCount;
 	private $arguments;
@@ -74,8 +89,8 @@ class Common {
 		$this->dirPath = $dirPath;
 	}
 
-	/** DOTA JE PRO MALY DECKA, LEAGUE OF LEGENDS TO JE PECKA
-	* LOOOOLKOOOOOOOO TOOO MAAAAM RAAAAAAD
+	/**
+	 *
 	 * @return bool
 	 */
 	public function isRF() {
@@ -145,17 +160,17 @@ class Common {
 				} else if (preg_match("/--int-script=.*/", $this->arguments[$i]) == 1 && $this->getInterpretPath() == "interpret.py") {
 					$this->setInterpretPath(substr($this->arguments[$i], 13));
 				} else {
-					throwException(10, "Wrong usage of arguments!", true);
+					$this->throwException(10, "Wrong usage of arguments!", true);
 				}
 			}
 			if (($this->getParsePath() != "interpret.py" || $this->getDirPath() != "./" || $this->getParsePath() != "parse.php" || $this->isRF()) && $this->isHF() == true) {
-				throwException(10, "Wrong usage of arguments!", true);
+				$this->throwException(10, "Wrong usage of arguments!", true);
 			}
 		}
 	}
 }
 
-class Test {
+class Test extends Singleton {
 	private $name;
 	private $erc;
 	private $testStatus;
@@ -268,25 +283,25 @@ class Test {
 
 	public function generateInFile() {
 		if ((file_put_contents($this->getName().".in", "\0")) == false) {
-			throwException(12, "ERROR writing file", true);
+			$this->throwException(12, "ERROR writing file", true);
 		}
 	}
 
 	public function generateOutFile() {
 		if ((file_put_contents($this->getName().".out", "\0")) == false) {
-			throwException(12, "ERROR writing file", true);
+			$this->throwException(12, "ERROR writing file", true);
 		}
 	}
 
 	public function generateRcFile() {
 		if ((file_put_contents($this->getName().".rc", "0\0")) == false) {
-			throwException(12, "ERROR writing file", true);
+			$this->throwException(12, "ERROR writing file", true);
 		}
 	}
 
 	public function loadErcFromFile() {
 		if (($read = file_get_contents($this->getName().".rc")) == false) {
-			throwException(12, "ERROR reading file", true);
+			$this->throwException(12, "ERROR reading file", true);
 		}
 		return $read;
 	}
@@ -348,7 +363,7 @@ class TestBehavior {
 	 *
 	 */
 	public function testBehavior() {
-		foreach ($this->testArray as $test) {
+		foreach ($this->getTestArray() as $test) {
 
 			$test->setTestStatus($this->testResults[0]);
 
@@ -395,7 +410,7 @@ class TestBehavior {
 
 }
 
-class TestDirectory {
+class TestDirectory extends Singleton {
 
 	private $recursive;
 	private $arrayOfTests = array();
@@ -410,7 +425,7 @@ class TestDirectory {
 
 	public function createTests($dir) {
 		if (($files = scandir($dir)) == false) {
-			throwException(10,"Directory is not a directory", true);
+			$this->throwException(10,"Directory is not a directory", true);
 		} else {
 			foreach ($files as $fd) {
 				if ($fd == "." || $fd == "..") {

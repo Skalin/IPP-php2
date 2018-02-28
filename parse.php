@@ -7,31 +7,45 @@
  */
 
 
+class Singleton {
 
-$fileName = "parse.php";
+	private $fileName = "parse.php";
 
-/**
- * Function for throwing exceptions and stopping the script
- *
- * @param int $errorCode selector of type of error
- * @param string $errorText Depending on this value function selects which type i will echo
- * @param bool $verbose value selects whether to echo error or not.
- */
+	private function __construct() {
 
-function throwException($errorCode, $errorText, $verbose) {
-	global $fileName;
-	if ($verbose) {
-		fwrite(STDERR, "ERROR: ".$errorText."\n");
-		fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$fileName." --help\n");
 	}
-	exit($errorCode);
+
+	public static function Instance()
+	{
+		static $inst = null;
+		if ($inst === null) {
+			$inst = new Singleton();
+		}
+		return $inst;
+	}
+
+	/**
+	 * Function for throwing exceptions and stopping the script
+	 *
+	 * @param int $errorCode selector of type of error
+	 * @param string $errorText Depending on this value function selects which type i will echo
+	 * @param bool $verbose value selects whether to echo error or not.
+	 */
+
+	public function throwException($errorCode, $errorText, $verbose) {
+		if ($verbose) {
+			fwrite(STDERR, "ERROR: ".$errorText."\n");
+			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$this->fileName." --help\n");
+		}
+		exit($errorCode);
+	}
 }
 
 
 /**
  * Class Parser
  */
-class Parser {
+class Parser extends Singleton {
 
 	/**
 	 * @var bool
@@ -214,17 +228,17 @@ class Parser {
 						$this->setFirst("C");
 					}
 				} else {
-					throwException(10, "Wrong usage of arguments!", true);
+					$this->throwException(10, "Wrong usage of arguments!", true);
 				}
 			}
 			if (($this->getLF() || $this->getCF()) && $this->getSF() == false) {
-				throwException(10, "Wrong usage of arguments!", true);
+				$this->throwException(10, "Wrong usage of arguments!", true);
 			} else if (($this->getLF() || $this->getCF() || $this->getSF()) && $this->getHF() == true) {
-				throwException(10, "Wrong usage of arguments!", true);
+				$this->throwException(10, "Wrong usage of arguments!", true);
 			} else if ($this->getSF() && $this->getStatsFile() == "") {
-				throwException(10, "Wrong stats file location!", true);
+				$this->throwException(10, "Wrong stats file location!", true);
 			} else if ($this->getSF() && (!$this->getCF() && !$this->getLF())) {
-				throwException(10, "Wrong usage of arguments!", true);
+				$this->throwException(10, "Wrong usage of arguments!", true);
 			}
 		}
 	}
@@ -289,7 +303,7 @@ class Token {
 /**
  * Class Lex
  */
-class Lex {
+class Lex extends Singleton {
 
 	/**
 	 * @var int
@@ -382,7 +396,7 @@ class Lex {
 				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
 				array_push($this->tokenArray, $token);
 			} else {
-				throwException(21, "LEX error analysis!",true);
+				$this->throwException(21, "LEX error analysis!",true);
 			}
 			foreach ($this->arrayOfLines as $line) {
 				$row = preg_replace('/\s+/', ' ',$line);
@@ -396,7 +410,7 @@ class Lex {
 								if (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
 									$token = new Token("LABEL", $rowArray[$i]);
 								} else {
-									throwException(21, "LEX error analysis!", true);
+									$this->throwException(21, "LEX error analysis!", true);
 								}
 							} else {
 								$token = new Token("INSTRUCTION", strtoupper($rowArray[$i]));
@@ -422,14 +436,14 @@ class Lex {
 							break;
 						default:
 							//TODO check other types and values
-							throwException(21, "LEX error analysis!",true);
+							$this->throwException(21, "LEX error analysis!",true);
 							break;
 					}
 				}
 				array_push($this->tokenArray, new Token("NEWLINE"));
 			}
 		} else {
-			throwException(10, "LEX error analysis! Empty input!", true);
+			$this->throwException(10, "LEX error analysis! Empty input!", true);
 		}
 		return $this->tokenArray;
 	}
@@ -439,7 +453,7 @@ class Lex {
 /**
  * Class Syntax
  */
-class Syntax {
+class Syntax extends Singleton {
 
 	/**
 	 * @var array
@@ -580,17 +594,17 @@ class Syntax {
 		for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
 			if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
 				if (($amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i])) < 0) {
-					throwException(21, "SYNTAX error analysis!", true);
+					$this->throwException(21, "SYNTAX error analysis!", true);
 				} else {
 					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
-						throwException(21, "SYNTAX error analysis!", true);
+						$this->throwException(21, "SYNTAX error analysis!", true);
 					}
 					$i += $amountOfArguments;
 				}
 			} else if ($this->arrayOfTokens[$i]->getType() == "NEWLINE" || $this->arrayOfTokens[$i]->getType() == "PROGRAM") {
 				continue;
 			} else {
-				throwException(21, "SYNTAX error analysis!", true);
+				$this->throwException(21, "SYNTAX error analysis!", true);
 			}
 		}
 	}
@@ -626,7 +640,7 @@ class Syntax {
 /**
  * Class Stats
  */
-class Stats {
+class Stats extends Singleton {
 
 	/**
 	 * @var
@@ -709,7 +723,7 @@ class Stats {
 			$string = "";
 		}
 		if (file_put_contents($this->getFile(), $string) == FALSE) {
-			throwException(12, "error while saving to file: ".$this->getFile()."!", true);
+			$this->throwException(12, "error while saving to file: ".$this->getFile()."!", true);
 		}
 	}
 }
@@ -718,7 +732,7 @@ class Stats {
 /**
  * Class XML
  */
-class XML {
+class XML extends Singleton {
 
 	/**
 	 * @var Token[]
