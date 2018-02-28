@@ -176,6 +176,7 @@ class Test extends Singleton {
 	private $testStatus;
 	private $parser;
 	private $interpret;
+	private $resultCode;
 
 
 	public function __construct($name) {
@@ -259,6 +260,13 @@ class Test extends Singleton {
 		$this->testResults = $testResults;
 	}
 
+	public function setResultCode($code) {
+		$this->resultCode = $code;
+	}
+
+	public function getResultCode() {
+		return $this->resultCode;
+	}
 
 	public function inFileExists() {
 		if ((file_exists($this->getName().".in") && (is_dir($this->getName().".in"))) || (!file_exists($this->getName().".in"))) {
@@ -393,8 +401,9 @@ class TestBehavior extends Singleton {
 
 			if ($returnVal != 0) {
 				if (!$test->compareReturnCode($returnVal)) {
+					$test->setResultCode($returnVal);
 					$test->setTestStatus($this->testResults[2]);
-					return;
+					continue;
 				}
 			}
 
@@ -407,19 +416,21 @@ class TestBehavior extends Singleton {
 			}
 			if ($returnVal != 0) {
 				if (!$test->compareReturnCode($returnVal)) {
+					$test->setResultCode($returnVal);
 					$test->setTestStatus($this->testResults[2]);
-					return;
+					continue;
 				}
 			}
 
 			if ($this->compareOutput(file_get_contents($test->getName()."out"), $output)) {
-				// TODO co delat kdyz je output false?
-
+				$test->setTestStatus($this->testResults[1]);
 			} else {
+				$test->setTestStatus($this->testResults[2]);
+				continue;
 			}
 		}
+		return $this->getTestArray();
 	}
-
 }
 
 class TestDirectory extends Singleton {
@@ -464,6 +475,128 @@ class TestDirectory extends Singleton {
 }
 
 
+class HtmlGenerator extends Singleton {
+
+	/*
+	 * var Test[] $testArray
+	 */
+	private $testArray;
+	private $directory;
+	private $parser;
+	private $interpret;
+	private $arguments;
+
+	public function __construct($testArray, $directory, $parser, $interpret, $arguments) {
+		$this->testArray = $testArray;
+		$this->directory = $directory;
+		$this->parser = $parser;
+		$this->interpret = $interpret;
+		$this->arguments = $arguments;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getDirectory() {
+		return $this->directory;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getParser() {
+		return $this->parser;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getInterpret() {
+		return $this->interpret;
+	}
+
+
+	/**
+	 * @return mixed
+	 */
+	public function getTestArray() {
+		return $this->testArray;
+	}
+
+	/**
+	 * @param mixed $testArray
+	 */
+	public function setTestArray($testArray) {
+		$this->testArray = $testArray;
+	}
+
+
+
+	public function generateHtml($stylised) {
+		if (!$stylised) {
+			$styles = "";
+		} else {
+			$styles = "			<style>
+			
+			.failed {color: red;}
+			.success {color: darkgreen;}
+			.wideTd {width: 200px;}
+			.shortTd {width: 150px;}
+			
+			.left {text-align: left;}
+			.center {text-align: center;}
+			.right {text-align: right;}
+			
+			html {
+			background-color: #111;
+			color: #0074D9;
+			}
+			
+			tr {
+			border-width: 1px;
+			border-color: black;
+			}
+			</style>";
+		}
+		$header = "<!DOCTYPE html>\n<meta charset=\"UTF-8\">\n<head>\n<title>Souhrn testů IPP 2018</title>\n".$styles."\n</head>\n<body>\n<h1>Souhrn testů</h1>\n";
+		$header .= "<p>Protokol o výsledku jednotlivých testů pro IPP 2018.</p>\n<h3>Adresář s testy: ".$this->getDirectory()."</h3>\n<h3>Parser: ".$this->getParser()."\n</h3>\n<h3>Interpret: ".$this->getInterpret()."</h3>";
+		$footer = "\n</body>\n</html>";
+
+		$innerHtmlHead = "<table>\n<tr><td>Testovací soubor</td><td class='wideTd right'>Výsledek testu</td><td class='shortTd center'>Návratový kód</td><td class='shortTd center'>Očekávaný návratový kód</td></tr>";
+
+		$failed = 0;
+		$successful = 0;
+		$amountOfTests = count($this->getTestArray());
+
+		foreach ($this->getTestArray() as $test) {
+			$innerHtmlHead .= "<tr><td class='left'>".$test->getName()."</td>";
+
+			if ($test->getTestStatus() == "FAIL") {
+				$failed++;
+				$innerHtmlHead .= "<td class='right failed'>".$test->getTestStatus();
+			} else if ($test->getTestStatus() == "SUCCESS") {
+				$successful++;
+				$innerHtmlHead .= "<td class='right sucess'>".$test->getTestStatus();
+			} else {
+				$innerHtmlHead .= "<td class='ignored right'>".$test->getTestStatus();
+			}
+			$innerHtmlHead .= "</td><td class='center result'>".$test->getResultCode()."</td><td class='center result'>".$test->getErc()."</td></tr>\n";
+
+		}
+		$innerHtmlBack = "</table>";
+
+		$amountOfFailedTests = $failed / $amountOfTests;
+		$amountOfSuccessfulTests = 1 - $amountOfFailedTests;
+
+		$statsHtml = "<p>Bylo provedeno ".$amountOfTests." testů. Z nichž bylo <span class='success'>".($amountOfSuccessfulTests*100)."% </span> (<span class='success'>".$successful."</span>) úspěšných a <span class='failed'>".($amountOfFailedTests*100)." %</span> (<span class='failed'>".$failed."</span>) neúspěšných</p>";
+
+		$output = $header.$innerHtmlHead.$innerHtmlBack.$statsHtml.$footer;
+		file_put_contents("test.html", $output);
+		echo $output;
+	}
+}
+
+
 $common = new Common ($argc, $argv);
 $common->parseArguments();
 
@@ -471,8 +604,10 @@ $testdir = new TestDirectory($common->isRF());
 $tests = $testdir->createTests($common->getDirPath());
 
 $testBehavior = new TestBehavior($tests, $common->getParsePath(), $common->getInterpretPath());
-$testBehavior->testBehavior();
+$tests = $testBehavior->testBehavior();
 
-
+$html = new HtmlGenerator($tests, $common->getDirPath(), $common->getParsePath(), $common->getInterpretPath(), $common->getArguments());
+$stylised = true; // enable styles
+$html->generateHtml($stylised);
 
 exit(0);
