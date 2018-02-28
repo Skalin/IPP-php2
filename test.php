@@ -368,7 +368,7 @@ class TestBehavior {
 				}
 			}
 
-			if (compareOutput(file_get_contents($test->getName()."out"), $output)) {
+			if ($this->compareOutput(file_get_contents($test->getName()."out"), $output)) {
 				// TODO co delat kdyz je output false?
 
 			} else {
