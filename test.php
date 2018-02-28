@@ -1,7 +1,7 @@
 <?php
 /**
  * Project: IPP
- * User: Dominik Skala (xskala11), Milan Hruban (xhruba08)
+ * User: Dominik Skala (xskala11)
  * Date: 20.2.18
  * Time: 16:11
  */
