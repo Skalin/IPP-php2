@@ -723,7 +723,7 @@ class Stats extends Singleton {
 			$string = "";
 		}
 		if (file_put_contents($this->getFile(), $string) == FALSE) {
-			$this->throwException(12, "error while saving to file: ".$this->getFile()."!", true);
+			$this->throwException(12, "File can not be saved: ".$this->getFile()."!", true);
 		}
 	}
 }
