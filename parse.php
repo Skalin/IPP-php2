@@ -404,7 +404,7 @@ class Lex {
 							$previousToken = $token->getType().".".$token->getContent();
 							break;
 						case (preg_match('/^(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
-							$token = new Token("VARIABLE", $rowArray[$i]);
+							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
 						case (preg_match('/^(string|bool|int)@[\%|\_|\-|\+|\$|\&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
@@ -444,34 +444,34 @@ class Syntax {
 	 * @var array
 	 */
 	private $syntaxRules = array(
-		"MOVE" => array("VARIABLE", "SYMB"),
+		"MOVE" => array("VAR", "SYMB"),
 		"CREATEFRAME" => array(),
 		"PUSHFRAME" => array(),
 		"POPFRAME" => array(),
-		"DEFVAR" => array("VARIABLE"),
+		"DEFVAR" => array("VAR"),
 		"CALL" => array("LABEL"),
 		"RETURN" => array(),
 		"PUSHS" => array("SYMB"),
-		"POPS" => array("VARIABLE"),
-		"ADD" => array("VARIABLE", "SYMB", "SYMB"),
-		"SUB" => array("VARIABLE", "SYMB", "SYMB"),
-		"MUL" => array("VARIABLE", "SYMB", "SYMB"),
-		"IDIV" => array("VARIABLE", "SYMB", "SYMB"),
-		"LT" => array("VARIABLE", "SYMB", "SYMB"),
-		"GT" => array("VARIABLE", "SYMB", "SYMB"),
-		"EQ" => array("VARIABLE", "SYMB", "SYMB"),
-		"AND" => array("VARIABLE", "SYMB", "SYMB"),
-		"OR" => array("VARIABLE", "SYMB", "SYMB"),
-		"NOT" => array("VARIABLE", "SYMB", "SYMB"),
-		"INT2CHAR" => array("VARIABLE", "SYMB"),
-		"STR2INT" => array("VARIABLE", "SYMB", "SYMB"),
-		"READ" => array("VARIABLE", "CONSTANT"),
+		"POPS" => array("VAR"),
+		"ADD" => array("VAR", "SYMB", "SYMB"),
+		"SUB" => array("VAR", "SYMB", "SYMB"),
+		"MUL" => array("VAR", "SYMB", "SYMB"),
+		"IDIV" => array("VAR", "SYMB", "SYMB"),
+		"LT" => array("VAR", "SYMB", "SYMB"),
+		"GT" => array("VAR", "SYMB", "SYMB"),
+		"EQ" => array("VAR", "SYMB", "SYMB"),
+		"AND" => array("VAR", "SYMB", "SYMB"),
+		"OR" => array("VAR", "SYMB", "SYMB"),
+		"NOT" => array("VAR", "SYMB", "SYMB"),
+		"INT2CHAR" => array("VAR", "SYMB"),
+		"STR2INT" => array("VAR", "SYMB", "SYMB"),
+		"READ" => array("VAR", "CONSTANT"),
 		"WRITE" => array("SYMB"),
-		"CONCAT" => array("VARIABLE", "SYMB", "SYMB"),
-		"STRLEN" => array("VARIABLE", "SYMB"),
-		"GETCHAR" => array("VARIABLE", "SYMB", "SYMB"),
-		"SETCHAR" => array("VARIABLE", "SYMB", "SYMB"),
-		"TYPE" => array("VARIABLE", "SYMB"),
+		"CONCAT" => array("VAR", "SYMB", "SYMB"),
+		"STRLEN" => array("VAR", "SYMB"),
+		"GETCHAR" => array("VAR", "SYMB", "SYMB"),
+		"SETCHAR" => array("VAR", "SYMB", "SYMB"),
+		"TYPE" => array("VAR", "SYMB"),
 		"LABEL" => array("LABEL"),
 		"JUMP" => array("LABEL"),
 		"JUMPIFEQ" => array("LABEL", "SYMB", "SYMB"),
@@ -483,7 +483,7 @@ class Syntax {
 	/**
 	 * @var array
 	 */
-	private $symbs = array("VARIABLE", "CONSTANT");
+	private $symbs = array("VAR", "CONSTANT");
 
 	/**
 	 * @var Token[]
@@ -546,7 +546,7 @@ class Syntax {
 		} else {
 			$rules = $this->getRules($tokenArray[$start]);
 			for ($i = 0; $i <= ($amount - 1); $i++) {
-				if ($rules[$i] == "VARIABLE" || $rules[$i] == "LABEL") {
+				if ($rules[$i] == "VAR" || $rules[$i] == "LABEL") {
 					if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 					} else {
 						return false;
