@@ -296,7 +296,7 @@ class Test {
 }
 
 class TestBehavior {
-	private $testArray = array();
+	private $testArray;
 	private $parser;
 	private $interpret;
 	private $testResults = array("IGNORE", "SUCCESS", "FAIL");
