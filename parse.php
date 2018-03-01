@@ -443,7 +443,7 @@ class Lex extends Singleton {
 				array_push($this->tokenArray, new Token("NEWLINE"));
 			}
 		} else {
-			$this->throwException(10, "LEX error analysis! Empty input!", true);
+			$this->throwException(21, "LEX error analysis! Empty input!", true);
 		}
 		return $this->tokenArray;
 	}
