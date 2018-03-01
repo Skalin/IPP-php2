@@ -408,7 +408,7 @@ class TestBehavior extends Singleton {
 			}
 
 			$xml = implode($output, "\n");
-
+/*
 			if ($this->programExists($this->getInterpret())) {
 				exec('python3 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
 			} else {
@@ -428,6 +428,7 @@ class TestBehavior extends Singleton {
 				$test->setTestStatus($this->testResults[2]);
 				continue;
 			}
+*/
 		}
 		return $this->getTestArray();
 	}
