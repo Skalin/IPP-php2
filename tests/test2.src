@@ -1,0 +1,22 @@
+﻿.IPPcode18
+DEFVAR GF@counter
+MOVE GF@counter  string@ #Inicializace  proměnné na prázdný řetězec
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+LABEL while
+JUMPIFEQ end  GF@counter  string@aaa
+CONCAT GF@counter  GF@counter  string@a
+LABEL while
+JUMPIFEQ end  GF@counter  string@aaa
+WRITE int@-5
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+#Jednoduch á iterace , dokud  nebude  spln ěna  zadaná podmínka
+WRITE GF@counterWRITE
+CONCAT GF@counter  GF@counter  string@a
+JUMP while
+CONCAT GF@counter  GF@counter
+JUMP while
+LABEL end
