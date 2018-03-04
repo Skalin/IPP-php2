@@ -324,7 +324,7 @@ class Lex extends Singleton {
 	 * @var array
 	 */
 	private $arrayOfInstructions = array("MOVE", "CREATEFRAME", "PUSHFRAME", "POPFRAME", "DEFVAR", "CALL", "RETURN", "PUSHS",
-		"POPS", "ADD", "SUB", "MUL", "IDIV", "LT", "GT", "EQ", "AND", "OR", "NOT", "INT2CHAR", "STR2INT",
+		"POPS", "ADD", "SUB", "MUL", "IDIV", "LT", "GT", "EQ", "AND", "OR", "NOT", "INT2CHAR", "STRI2INT",
 		"READ", "WRITE", "CONCAT", "STRLEN", "GETCHAR", "SETCHAR", "TYPE", "LABEL", "JUMP", "JUMPIFEQ",
 		"JUMPIFNEQ", "DPRINT", "BREAK");
 
@@ -418,11 +418,11 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							$previousToken = $token->getType().".".$token->getContent();
 							break;
-						case (preg_match('/^(LF|TF|GF)@[%|_|-|\$|&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(LF|TF|GF)@[%|_|-|$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/^(string|bool|int)@[\%|\_|\-|\+|\$|\&|\*|A-z]?[%|_|-|\$|&|\*|A-z|0-9]*$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-z]?[\S]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -430,7 +430,7 @@ class Lex extends Singleton {
 							// comments
 							$this->setAmountOfComments($this->getAmountOfComments()+1);
 							break 2;
-						case (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^[\%|\_|\-|\$|\&|*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("LABEL", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -477,9 +477,9 @@ class Syntax extends Singleton {
 		"EQ" => array("VAR", "SYMB", "SYMB"),
 		"AND" => array("VAR", "SYMB", "SYMB"),
 		"OR" => array("VAR", "SYMB", "SYMB"),
-		"NOT" => array("VAR", "SYMB", "SYMB"),
+		"NOT" => array("VAR", "SYMB"),
 		"INT2CHAR" => array("VAR", "SYMB"),
-		"STR2INT" => array("VAR", "SYMB", "SYMB"),
+		"STRI2INT" => array("VAR", "SYMB", "SYMB"),
 		"READ" => array("VAR", "CONSTANT"),
 		"WRITE" => array("SYMB"),
 		"CONCAT" => array("VAR", "SYMB", "SYMB"),
@@ -604,6 +604,7 @@ class Syntax extends Singleton {
 			} else if ($this->arrayOfTokens[$i]->getType() == "NEWLINE" || $this->arrayOfTokens[$i]->getType() == "PROGRAM") {
 				continue;
 			} else {
+				echo $this->arrayOfTokens[$i]->getType()." and content: ".$this->arrayOfTokens[$i]->getContent()."\n";
 				$this->throwException(21, "SYNTAX error analysis!", true);
 			}
 		}
@@ -758,9 +759,13 @@ class XML extends Singleton {
 	 * @return string
 	 */
 	private function convertStringLiterals($string) {
-		$newString = str_replace("<", "&lt;", $string);
+		echo "Original string: ".$string."\n";
+		$newString = str_replace("&", "&amp;", $string);
+		echo "Replaced string: ".$newString."\n";
+		$newString = str_replace("<", "&lt;", $newString);
+		echo "Replaced string: ".$newString."\n";
 		$newString = str_replace(">", "&gt;", $newString);
-		$newString = str_replace("&", "&amp;", $newString);
+		echo "Replaced string: ".$newString."\n";
 		return $newString;
 	}
 
