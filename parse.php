@@ -435,7 +435,7 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							break;
 						default:
-							//TODO check other types and values
+							// TODO only int|string|bool after READ
 							$this->throwException(21, "LEX error analysis!",true);
 							break;
 					}
@@ -576,6 +576,14 @@ class Syntax extends Singleton {
 							$tokenArray[$start + $i + 1]->setContent($content);
 						}
 					} else {
+						echo "Token: ".$tokenArray[$start]->getType()." and content: ".$tokenArray[$start]->getContent()."\n";
+						echo "Expected amount: ".$amountOfArguments."\n";
+						echo "Real amount: ".$amount."\n";
+						$j = 0;
+						while ($j <= $amount) {
+							echo "Token: ".$tokenArray[$start+$j]->getType()." and content: ".$tokenArray[$start+$j]->getContent()."\n";
+							$j++;
+						}
 						return false;
 					}
 				} else {
@@ -597,6 +605,7 @@ class Syntax extends Singleton {
 					$this->throwException(21, "SYNTAX error analysis!", true);
 				} else {
 					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
+						echo $this->arrayOfTokens[$i]->getType()." and content: ".$this->arrayOfTokens[$i]->getContent()."\n";
 						$this->throwException(21, "SYNTAX error analysis!", true);
 					}
 					$i += $amountOfArguments;
@@ -604,7 +613,6 @@ class Syntax extends Singleton {
 			} else if ($this->arrayOfTokens[$i]->getType() == "NEWLINE" || $this->arrayOfTokens[$i]->getType() == "PROGRAM") {
 				continue;
 			} else {
-				echo $this->arrayOfTokens[$i]->getType()." and content: ".$this->arrayOfTokens[$i]->getContent()."\n";
 				$this->throwException(21, "SYNTAX error analysis!", true);
 			}
 		}
@@ -806,6 +814,7 @@ class XML extends Singleton {
 						$arg = "arg".$argumentIterator;
 						$xmlArgument = $xmlInstruction->addChild($arg);
 						$xmlArgument->addAttribute('type', $instructions[$i]->getType());
+						// TODO Bug in this function, replaces & even though i dont want to replace it
 						$xmlArgument[0] = $this->convertStringLiterals($instructions[$i]->getContent());
 						$argumentIterator++;
 					}
