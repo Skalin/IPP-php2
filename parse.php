@@ -431,7 +431,11 @@ class Lex extends Singleton {
 							$this->setAmountOfComments($this->getAmountOfComments()+1);
 							break 2;
 						case (preg_match('/^[\%|\_|\-|\$|\&|*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
-							$token = new Token("LABEL", $rowArray[$i]);
+							if (preg_match('/^(int|string|bool)$/', $rowArray[$i]) == true) {
+								$token = new Token("TYPE", $rowArray[$i]);
+							} else {
+								$token = new Token("LABEL", $rowArray[$i]);
+							}
 							array_push($this->tokenArray, $token);
 							break;
 						default:
@@ -480,7 +484,7 @@ class Syntax extends Singleton {
 		"NOT" => array("VAR", "SYMB"),
 		"INT2CHAR" => array("VAR", "SYMB"),
 		"STRI2INT" => array("VAR", "SYMB", "SYMB"),
-		"READ" => array("VAR", "CONSTANT"),
+		"READ" => array("VAR", "TYPE"),
 		"WRITE" => array("SYMB"),
 		"CONCAT" => array("VAR", "SYMB", "SYMB"),
 		"STRLEN" => array("VAR", "SYMB"),
@@ -561,7 +565,7 @@ class Syntax extends Singleton {
 		} else {
 			$rules = $this->getRules($tokenArray[$start]);
 			for ($i = 0; $i <= ($amount - 1); $i++) {
-				if ($rules[$i] == "VAR" || $rules[$i] == "LABEL") {
+				if ($rules[$i] == "VAR" || $rules[$i] == "LABEL" || $rules[$i] == "TYPE") {
 					if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 					} else {
 						return false;
@@ -576,14 +580,6 @@ class Syntax extends Singleton {
 							$tokenArray[$start + $i + 1]->setContent($content);
 						}
 					} else {
-						echo "Token: ".$tokenArray[$start]->getType()." and content: ".$tokenArray[$start]->getContent()."\n";
-						echo "Expected amount: ".$amountOfArguments."\n";
-						echo "Real amount: ".$amount."\n";
-						$j = 0;
-						while ($j <= $amount) {
-							echo "Token: ".$tokenArray[$start+$j]->getType()." and content: ".$tokenArray[$start+$j]->getContent()."\n";
-							$j++;
-						}
 						return false;
 					}
 				} else {
@@ -605,7 +601,6 @@ class Syntax extends Singleton {
 					$this->throwException(21, "SYNTAX error analysis!", true);
 				} else {
 					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
-						echo $this->arrayOfTokens[$i]->getType()." and content: ".$this->arrayOfTokens[$i]->getContent()."\n";
 						$this->throwException(21, "SYNTAX error analysis!", true);
 					}
 					$i += $amountOfArguments;
@@ -767,13 +762,25 @@ class XML extends Singleton {
 	 * @return string
 	 */
 	private function convertStringLiterals($string) {
-		echo "Original string: ".$string."\n";
-		$newString = str_replace("&", "&amp;", $string);
-		echo "Replaced string: ".$newString."\n";
-		$newString = str_replace("<", "&lt;", $newString);
-		echo "Replaced string: ".$newString."\n";
-		$newString = str_replace(">", "&gt;", $newString);
-		echo "Replaced string: ".$newString."\n";
+		$stringArray = str_split($string);
+
+		// todo wtf not working
+		foreach ($stringArray as $key => $char) {
+			if ($char == "&") {
+				array_splice($stringArray, $key, 5, array('&', 'a', 'm', 'p', ';'));
+			}
+		}
+		foreach ($stringArray as $key => $char) {
+			if ($char == "<") {
+				array_splice($stringArray, $key, 0, array('&', 'l', 't', ';'));
+			}
+		}
+		foreach ($stringArray as $key => $char) {
+			if ($char == ">") {
+				array_splice($stringArray, $key, 0, array('&', 'g', 't', ';'));
+			}
+		}
+		$newString = implode("", $stringArray);
 		return $newString;
 	}
 
