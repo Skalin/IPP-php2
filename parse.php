@@ -762,25 +762,10 @@ class XML extends Singleton {
 	 * @return string
 	 */
 	private function convertStringLiterals($string) {
-		$stringArray = str_split($string);
-
-		// todo wtf not working
-		foreach ($stringArray as $key => $char) {
-			if ($char == "&") {
-				array_splice($stringArray, $key, 5, array('&', 'a', 'm', 'p', ';'));
-			}
-		}
-		foreach ($stringArray as $key => $char) {
-			if ($char == "<") {
-				array_splice($stringArray, $key, 0, array('&', 'l', 't', ';'));
-			}
-		}
-		foreach ($stringArray as $key => $char) {
-			if ($char == ">") {
-				array_splice($stringArray, $key, 0, array('&', 'g', 't', ';'));
-			}
-		}
-		$newString = implode("", $stringArray);
+		$newString = $string;
+		str_replace("&", "&amp;", $newString);
+		str_replace("<", "&lt;", $newString);
+		str_replace(">", "&gt;", $newString);
 		return $newString;
 	}
 
@@ -821,7 +806,6 @@ class XML extends Singleton {
 						$arg = "arg".$argumentIterator;
 						$xmlArgument = $xmlInstruction->addChild($arg);
 						$xmlArgument->addAttribute('type', $instructions[$i]->getType());
-						// TODO Bug in this function, replaces & even though i dont want to replace it
 						$xmlArgument[0] = $this->convertStringLiterals($instructions[$i]->getContent());
 						$argumentIterator++;
 					}
@@ -837,7 +821,7 @@ class XML extends Singleton {
 			}
 		}
 		$this->setAmountOfInstructions($instructionIterator);
-		return $xmlProgram->asXML();
+		return $xmlProgram;
 	}
 }
 
@@ -860,6 +844,8 @@ if ($parser->getSF()) {
 	$stats->saveToFile($xml->getAmountOfInstructions(), $lex->getAmountOfComments());
 }
 
-echo $xmlOutput;
+$dom = dom_import_simplexml($xmlOutput)->ownerDocument;
+$dom->formatOutput = true;
+echo $dom->saveXml();
 
 exit(0);
