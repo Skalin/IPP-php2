@@ -410,7 +410,7 @@ class Lex extends Singleton {
 					switch($rowArray[$i]) {
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
 							if (preg_match('/(INSTRUCTION\.)(CALL|LABEL|JUMP|JUMPIFEQ|JUMPIFNEQ)/', $previousToken) == true) {
-								if (preg_match('/^[%|_|\-|$|\&|\*|A-ž]{1}[%|_|\-|\$|&|\*|A-ž|0-9]+$/', $rowArray[$i]) == true) {
+								if (preg_match('/^[%|_|\-|$|\&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
 									$token = new Token("LABEL", $rowArray[$i]);
 								} else {
 									$this->throwException(21, "Token: ". $rowArray[$i], false);
@@ -422,11 +422,11 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							$previousToken = $token->getType().".".$token->getContent();
 							break;
-						case (preg_match('/^(LF|TF|GF)@[%|_|\-|\$|&|\*|A-ž]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(LF|TF|GF)@[%|_|\-|\$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-ž|0-9]{1}[\S]*$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-z|0-9]{1}[\S]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -434,7 +434,7 @@ class Lex extends Singleton {
 							// comments
 							$this->setAmountOfComments($this->getAmountOfComments()+1);
 							break 2;
-						case (preg_match('/^[%|_|\-|\$|&|\*|A-ž]{1}[%|_|\-|\$|&|\*|A-ž|0-9]+$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^[%|_|\-|\$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							if (preg_match('/^(int|string|bool)$/', $rowArray[$i]) == true) {
 								$token = new Token("TYPE", $rowArray[$i]);
 							} else {
