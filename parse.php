@@ -29,15 +29,17 @@ class Singleton {
 	 *
 	 * @param int $errorCode selector of type of error
 	 * @param string $errorText Depending on this value function selects which type i will echo
-	 * @param bool $verbose value selects whether to echo error or not.
+	 * @param bool $killable value selects whether to kill after error or not.
 	 */
 
-	public function throwException($errorCode, $errorText, $verbose) {
-		if ($verbose) {
-			fwrite(STDERR, "ERROR: ".$errorText."\n");
-			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$this->fileName." --help\n");
+	public function throwException($errorCode, $errorText, $killable) {
+
+		fwrite(STDERR, "ERROR: ".$errorText."\n");
+
+		if ($killable) {
+			fwrite(STDERR, "Please, consider looking for help, run script as: " . __DIR__ . "/" . $this->fileName . " --help\n");
+			exit($errorCode);
 		}
-		exit($errorCode);
 	}
 }
 
@@ -396,6 +398,7 @@ class Lex extends Singleton {
 				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
 				array_push($this->tokenArray, $token);
 			} else {
+				$this->throwException(21, "Token: ". $this->arrayOfLines[0], false);
 				$this->throwException(21, "LEX error analysis!",true);
 			}
 			foreach ($this->arrayOfLines as $line) {
@@ -407,9 +410,10 @@ class Lex extends Singleton {
 					switch($rowArray[$i]) {
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
 							if (preg_match('/(INSTRUCTION\.)(CALL|LABEL|JUMP|JUMPIFEQ|JUMPIFNEQ)/', $previousToken) == true) {
-								if (preg_match('/^[\%|\_|\-|\$|\&|\*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
+								if (preg_match('/^[%|_|\-|$|\&|\*|A-ž]{1}[%|_|\-|\$|&|\*|A-ž|0-9]+$/', $rowArray[$i]) == true) {
 									$token = new Token("LABEL", $rowArray[$i]);
 								} else {
+									$this->throwException(21, "Token: ". $rowArray[$i], false);
 									$this->throwException(21, "LEX error analysis!", true);
 								}
 							} else {
@@ -418,11 +422,11 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							$previousToken = $token->getType().".".$token->getContent();
 							break;
-						case (preg_match('/^(LF|TF|GF)@[%|_|-|$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(LF|TF|GF)@[%|_|\-|\$|&|\*|A-ž]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-z]?[\S]*$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-ž|0-9]{1}[\S]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -430,7 +434,7 @@ class Lex extends Singleton {
 							// comments
 							$this->setAmountOfComments($this->getAmountOfComments()+1);
 							break 2;
-						case (preg_match('/^[\%|\_|\-|\$|\&|*|A-z]{1}[%|_|-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^[%|_|\-|\$|&|\*|A-ž]{1}[%|_|\-|\$|&|\*|A-ž|0-9]+$/', $rowArray[$i]) ? true : false):
 							if (preg_match('/^(int|string|bool)$/', $rowArray[$i]) == true) {
 								$token = new Token("TYPE", $rowArray[$i]);
 							} else {
@@ -439,7 +443,7 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							break;
 						default:
-							// TODO only int|string|bool after READ
+							$this->throwException(21, "Token: ". $rowArray[$i], false);
 							$this->throwException(21, "LEX error analysis!",true);
 							break;
 					}
