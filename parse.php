@@ -395,7 +395,7 @@ class Lex extends Singleton {
 	public function analyse() {
 		if (count($this->arrayOfLines) > 0) {
 			if (strtoupper($this->arrayOfLines[0]) == ".IPPCODE18") {
-				$token = new Token("PROGRAM", array_shift($this->arrayOfLines));
+				$token = new Token("PROGRAM", "IPPcode18" /* substr(array_shift($this->arrayOfLines), 1) */);
 				array_push($this->tokenArray, $token);
 			} else {
 				$this->throwException(21, "Token: ". $this->arrayOfLines[0], false);
