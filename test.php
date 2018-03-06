@@ -48,6 +48,9 @@ class Common extends Singleton {
 	private $hF;
 	private $dirPath;
 	private $rF;
+	private $iF;
+	private $dF;
+	private $pF;
 	private $parsePath;
 	private $interpretPath;
 
@@ -56,8 +59,11 @@ class Common extends Singleton {
 		$this->arguments = $argv;
 		$this->hF = false;
 		$this->dirPath = "./";
+		$this->dF = false;
 		$this->rF = false;
+		$this->pF = false;
 		$this->parsePath = "./parse.php";
+		$this->iF = false;
 		$this->interpretPath = "./interpret.py";
 	}
 
@@ -101,6 +107,48 @@ class Common extends Singleton {
 	 */
 	public function setDirPath($dirPath) {
 		$this->dirPath = $dirPath;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isIF() {
+		return $this->iF;
+	}
+
+	/**
+	 * @param bool $iF
+	 */
+	public function setIF($iF) {
+		$this->iF = $iF;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isPF() {
+		return $this->pF;
+	}
+
+	/**
+	 * @param bool $pF
+	 */
+	public function setPF($pF) {
+		$this->pF = $pF;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isDF() {
+		return $this->dF;
+	}
+
+	/**
+	 * @param bool $dF
+	 */
+	public function setDF($dF) {
+		$this->dF = $dF;
 	}
 
 	/**
@@ -168,16 +216,19 @@ class Common extends Singleton {
 				} else if (preg_match("/--recursive/", $this->arguments[$i]) == 1 && $this->isRF() != true) {
 					$this->setRF(true);
 				} else if (preg_match("/--directory=.*/", $this->arguments[$i]) == 1 && $this->getDirPath() == "./") {
+					$this->setDF(true);
 					$this->setDirPath(substr($this->arguments[$i], 12));
 				} else if (preg_match("/--parse-script=.*/", $this->arguments[$i]) == 1 && $this->getParsePath() == "parse.php") {
+					$this->setPF(true);
 					$this->setParsePath(substr($this->arguments[$i], 15));
 				} else if (preg_match("/--int-script=.*/", $this->arguments[$i]) == 1 && $this->getInterpretPath() == "interpret.py") {
+					$this->setIF(true);
 					$this->setInterpretPath(substr($this->arguments[$i], 13));
 				} else {
 					$this->throwException(10, "Wrong usage of arguments!", true);
 				}
 			}
-			if ((($this->getParsePath() != "interpret.py" || $this->getDirPath() != "./" || $this->getParsePath() != "parse.php" || $this->isRF()) && $this->isHF()) == true) {
+			if ((($this->isPF() || $this->isIF() || $this->isDF() || $this->isRF()) && $this->isHF()) == true) {
 				$this->throwException(10, "Wrong usage of arguments!", true);
 			}
 		}
