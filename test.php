@@ -62,6 +62,20 @@ class Common extends Singleton {
 	}
 
 	/**
+	 *
+	 */
+	public function printHelp() {
+		if ($this->isHF()) {
+			echo "test.php - lexikalni a syntakticky analyzator v jazyce PHP 5.6\n";
+			echo "Autor: Dominik Skala (xskala11)\n";
+			echo "Predmet: IPP 2018\n";
+			echo "Automatická testovací aplikace pro IPP syntaktický a lexikální analyzátor a interpret pro jazyk IPPcode18.\n";
+			echo "Implementovana rozsireni: STATS\n\n";
+			echo "Argumenty:\n";
+			exit(0);
+		}
+	}
+	/**
 	 * @return bool
 	 */
 	public function isHF() {
@@ -602,6 +616,7 @@ class HtmlGenerator extends Singleton {
 
 $common = new Common ($argc, $argv);
 $common->parseArguments();
+$common->printHelp();
 
 $testDir = new TestDirectory($common->isRF());
 $tests = $testDir->createTests($common->getDirPath());
