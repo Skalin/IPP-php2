@@ -177,7 +177,7 @@ class Common extends Singleton {
 					$this->throwException(10, "Wrong usage of arguments!", true);
 				}
 			}
-			if (($this->getParsePath() != "interpret.py" || $this->getDirPath() != "./" || $this->getParsePath() != "parse.php" || $this->isRF()) && $this->isHF() == true) {
+			if ((($this->getParsePath() != "interpret.py" || $this->getDirPath() != "./" || $this->getParsePath() != "parse.php" || $this->isRF()) && $this->isHF()) == true) {
 				$this->throwException(10, "Wrong usage of arguments!", true);
 			}
 		}
