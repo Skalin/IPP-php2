@@ -411,7 +411,7 @@ class Lex extends Singleton {
 					switch($rowArray[$i]) {
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
 							if (preg_match('/(INSTRUCTION\.)(CALL|LABEL|JUMP|JUMPIFEQ|JUMPIFNEQ)/', $previousToken) == true) {
-								if (preg_match('/^[%|_|\-|$|\&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
+								if (preg_match('/^[%|_|\-|\$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
 									$token = new Token("LABEL", $rowArray[$i]);
 								} else {
 									$this->throwException(21, "Token: ". $rowArray[$i], false);
@@ -427,7 +427,15 @@ class Lex extends Singleton {
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-z|0-9]{0,1}[\S]*$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(string)@[%|_|\-|\+|\$|&|\*|A-z|0-9]{0,1}[\S]*$/', $rowArray[$i]) ? true : false):
+							$token = new Token("CONSTANT", $rowArray[$i]);
+							array_push($this->tokenArray, $token);
+							break;
+						case(preg_match('/^(int)@[\-|\+|0-9]?[0-9]*$/', $rowArray[$i]) ? true : false):
+							$token = new Token("CONSTANT", $rowArray[$i]);
+							array_push($this->tokenArray, $token);
+							break;
+						case(preg_match('/^(bool)@(true|false)$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -444,7 +452,7 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							break;
 						default:
-							$this->throwException(21, "Token: ". $rowArray[$i], false);
+							$this->throwException(21, "Unrecognizable token: ". $rowArray[$i], false);
 							$this->throwException(21, "LEX error analysis!",true);
 							break;
 					}
