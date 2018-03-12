@@ -394,12 +394,12 @@ class Lex extends Singleton {
 	 */
 	public function analyse() {
 		if (count($this->arrayOfLines) > 0) {
-			if (strtoupper($this->arrayOfLines[0]) == ".IPPCODE18") {
+			if (substr(strtoupper($this->arrayOfLines[0]), 0, 10) == ".IPPCODE18") {
 				$token = new Token("PROGRAM", "IPPcode18");
 				array_push($this->tokenArray, $token);
 				array_shift($this->arrayOfLines);
 			} else {
-				$this->throwException(21, "Token: ". $this->arrayOfLines[0], false);
+				$this->throwException(21, "Given token: ". $this->arrayOfLines[0].", expected language specification: .IPPcode18", false);
 				$this->throwException(21, "LEX error analysis!",true);
 			}
 			foreach ($this->arrayOfLines as $line) {
@@ -427,11 +427,11 @@ class Lex extends Singleton {
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/^(string)@[%|_|\-|\+|\$|&|\*|A-z|0-9]{0,1}[\S]*$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(string)@[\S]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case(preg_match('/^(int)@[\-|\+|0-9]?[0-9]*$/', $rowArray[$i]) ? true : false):
+						case(preg_match('/^(int)@[\-|\+|0-9]+[0-9]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
