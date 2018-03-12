@@ -395,8 +395,9 @@ class Lex extends Singleton {
 	public function analyse() {
 		if (count($this->arrayOfLines) > 0) {
 			if (strtoupper($this->arrayOfLines[0]) == ".IPPCODE18") {
-				$token = new Token("PROGRAM", "IPPcode18" /* substr(array_shift($this->arrayOfLines), 1) */);
+				$token = new Token("PROGRAM", "IPPcode18");
 				array_push($this->tokenArray, $token);
+				array_shift($this->arrayOfLines);
 			} else {
 				$this->throwException(21, "Token: ". $this->arrayOfLines[0], false);
 				$this->throwException(21, "LEX error analysis!",true);
@@ -426,7 +427,7 @@ class Lex extends Singleton {
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
-						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-z|0-9]{1}[\S]*$/', $rowArray[$i]) ? true : false):
+						case (preg_match('/^(string|bool|int)@[%|_|\-|\+|\$|&|\*|A-z|0-9]{0,1}[\S]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -565,6 +566,7 @@ class Syntax extends Singleton {
 	private function checkArguments($tokenArray, $start, $amount) {
 		$amountOfArguments = $this->getAmountOfArguments($tokenArray, $start);
 		if ($amountOfArguments != $amount) {
+			$this->throwException(21, "Wrong amount of arguments, expected: ". $amount.", given: ".$amountOfArguments, false);
 			return false;
 		} else {
 			$rules = $this->getRules($tokenArray[$start]);
@@ -572,6 +574,7 @@ class Syntax extends Singleton {
 				if ($rules[$i] == "VAR" || $rules[$i] == "LABEL" || $rules[$i] == "TYPE") {
 					if ($rules[$i] == $tokenArray[$start + $i + 1]->getType()) {
 					} else {
+						$this->throwException(21, "Unexpected type of token, expected: ". $rules[$i].", given: ".$tokenArray[$start + $i + 1]->getType(), false);
 						return false;
 					}
 				} else if ($rules[$i] == "SYMB" || $rules[$i] == "CONSTANT") {
@@ -587,6 +590,7 @@ class Syntax extends Singleton {
 						return false;
 					}
 				} else {
+					$this->throwException(21, "Unexpected type of token: ".$tokenArray[$start + $i + 1]->getType(), false);
 					return false;
 				}
 			}
@@ -602,9 +606,11 @@ class Syntax extends Singleton {
 		for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
 			if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
 				if (($amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i])) < 0) {
+					$this->throwException(21, "Given amount of arguments: ".$amountOfArguments, false);
 					$this->throwException(21, "SYNTAX error analysis!", true);
 				} else {
 					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
+						$this->throwException(21, "Wrong amount of arguments for instruction: ".$this->arrayOfTokens[$i]->getContent(), false);
 						$this->throwException(21, "SYNTAX error analysis!", true);
 					}
 					$i += $amountOfArguments;
