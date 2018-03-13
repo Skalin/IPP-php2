@@ -6,15 +6,26 @@
  * Time: 16:44
  */
 
-
+/*
+ * Trida Singleton
+ */
 class Singleton {
 
+	/**
+	 * @var string nazev analyzatoru
+	 */
 	private $fileName = "parse.php";
 
+	/**
+	 * Konstruktor tridy Singleton
+	 */
 	private function __construct() {
 
 	}
 
+	/**
+	 * @return Singleton Instance tridy Singleton
+	 */
 	public static function Instance()
 	{
 		static $inst = null;
@@ -25,11 +36,11 @@ class Singleton {
 	}
 
 	/**
-	 * Function for throwing exceptions and stopping the script
+	 * Funkce slouzici pro tisk chybovych zprav. Pokud je zavolana s parametrem $killable, ktery je true, funkce ukonci chovani skriptu
 	 *
-	 * @param int $errorCode selector of type of error
-	 * @param string $errorText Depending on this value function selects which type i will echo
-	 * @param bool $killable value selects whether to kill after error or not.
+	 * @param integer $errorCode Ciselna hodnota chyboveho stavu
+	 * @param string $errorText Obsah chyboveho hlaseni
+	 * @param boolean $killable Parametr urcujici zda dojde k ukonceni skriptu - pokud je true, skript se ukonci, jinak ne
 	 */
 
 	public function throwException($errorCode, $errorText, $killable) {
@@ -45,24 +56,24 @@ class Singleton {
 
 
 /**
- * Class Parser
+ * Trida Parser
  */
 class Parser extends Singleton {
 
 	/**
-	 * @var bool
+	 * @var boolean
 	 */
 	private $hF;
 	/**
-	 * @var bool
+	 * @var boolean
 	 */
 	private $sF;
 	/**
-	 * @var bool
+	 * @var boolean
 	 */
 	private $lF;
 	/**
-	 * @var bool
+	 * @var boolean
 	 */
 	private $cF;
 	/**
@@ -569,7 +580,7 @@ class Syntax extends Singleton {
 	 * @param Token[] $tokenArray
 	 * @param $start
 	 * @param $amount
-	 * @return bool
+	 * @return boolean
 	 */
 	private function checkArguments($tokenArray, $start, $amount) {
 		$amountOfArguments = $this->getAmountOfArguments($tokenArray, $start);
@@ -633,7 +644,7 @@ class Syntax extends Singleton {
 
 	/**
 	 * @param Token $inputToken
-	 * @return bool|mixed
+	 * @return boolean|mixed
 	 */
 	private function getRules(Token $inputToken) {
 		foreach ($this->syntaxRules as $key => $rules) {
@@ -717,22 +728,22 @@ class Stats extends Singleton {
 	}
 
 	/**
-	 * @return mixed
+	 * @return string Hodnota "L" nebo "C" urcujici ktery z parametru bude v souboru vytisten prvni
 	 */
 	public function getFirst() {
 		return $this->first;
 	}
 
 	/**
-	 * @param mixed $first
+	 * @param $first string Hodnota "L" nebo "C" urcujici ktery z parametru bude v souboru vytisten prvni
 	 */
 	public function setFirst($first) {
 		$this->first = $first;
 	}
 
 	/**
-	 * @param $amountOfLinesOfCode
-	 * @param $amountOfComments
+	 * @param $amountOfLinesOfCode integer Pocet radku kodu
+	 * @param $amountOfComments integer Pocet radku na kterych se vyskytoval komentar
 	 */
 	public function saveToFile($amountOfLinesOfCode, $amountOfComments) {
 		if ($this->getFlags()[0] && $this->getFlags()[1]) {
@@ -757,27 +768,29 @@ class Stats extends Singleton {
 class XML extends Singleton {
 
 	/**
-	 * @var Token[]
+	 * @var Token[] Pole tokenu
 	 */
 	private $instructions;
 
 	/**
-	 * @var
+	 * @var integer Pocet radku s instrukcemi pro statistiky
 	 */
 	private $amountOfInstructions;
 
 	/**
-	 * XML constructor.
+	 * XML konstruktor
 	 *
-	 * @param $instructions
+	 * @param $instructions[] Pole instrukci
 	 */
 	public function __construct($instructions) {
 		$this->instructions = $instructions;
 	}
 
 	/**
-	 * @param $string
-	 * @return string
+	 * Funkce provede konverzi znaku &, > a < ve stringu, ktery se ulozi do XML za ucelem maximalni kompatibility
+	 *
+	 * @param $string string Upravovany retezec
+	 * @return string Upraveny retezec
 	 */
 	private function convertStringLiterals($string) {
 		$newString = $string;
@@ -788,21 +801,23 @@ class XML extends Singleton {
 	}
 
 	/**
-	 * @param $amount
+	 * @param $amount integer Pocet instrukci
 	 */
 	private function setAmountOfInstructions($amount) {
 		$this->amountOfInstructions = $amount;
 	}
 
 	/**
-	 * @return integer
+	 * @return integer Pocet instrukci
 	 */
 	public function getAmountOfInstructions() {
 		return $this->amountOfInstructions;
 	}
 
 	/**
-	 * @return mixed
+	 * Funkce z třídní proměnné $instructions ziska soupis instrukci, ktere byly zvalidovany a vytvori z nich XML Element
+	 *
+	 * @return SimpleXMLElement XML Element obsahujici jednotlive operace s argumenty po analyze zdrojoveho kodu
 	 */
 	public function generateXml() {
 		$instructions = $this->instructions;
