@@ -12,7 +12,7 @@
 class Singleton {
 
 	/**
-	 * @var string nazev analyzatoru
+	 * @var string Nazev analyzatoru
 	 */
 	private $fileName = "parse.php";
 
@@ -183,10 +183,7 @@ class Parser extends Singleton {
 	/*
 	 * Function is reading the text from STDIN
 	 *
-	 * @return string $input Text from STDIN is converted into string and returned, if no chars were read, function returns blank string
-	 */
-	/**
-	 * @return array|string
+	 * @return string[] $input Text from STDIN is converted into string and returned, if no chars were read, function returns blank string
 	 */
 	public function readFromStdinToInput() {
 		$input = "";
@@ -314,7 +311,7 @@ class Token {
 
 
 /**
- * Class Lex
+ * Trida Lex
  */
 class Lex extends Singleton {
 
@@ -329,12 +326,12 @@ class Lex extends Singleton {
 	private $arrayOfLines;
 
 	/**
-	 * @var array
+	 * @var Token[]
 	 */
 	private $tokenArray;
 
 	/**
-	 * @var array
+	 * @var string[] Pole klicovych slov pro instrukce
 	 */
 	private $arrayOfInstructions = array("MOVE", "CREATEFRAME", "PUSHFRAME", "POPFRAME", "DEFVAR", "CALL", "RETURN", "PUSHS",
 		"POPS", "ADD", "SUB", "MUL", "IDIV", "LT", "GT", "EQ", "AND", "OR", "NOT", "INT2CHAR", "STRI2INT",
@@ -342,9 +339,9 @@ class Lex extends Singleton {
 		"JUMPIFNEQ", "DPRINT", "BREAK");
 
 	/**
-	 * Lex constructor.
+	 * Konstruktor tridy Lex
 	 *
-	 * @param $arrayOfLines
+	 * @param string[] $arrayOfLines Pole radku ze standardniho vstupu
 	 */
 	public function __construct($arrayOfLines) {
 		$this->arrayOfLines = $arrayOfLines;
@@ -401,10 +398,14 @@ class Lex extends Singleton {
 	}
 
 	/**
-	 * @return array
+	 * Funkce provede lexikalni analyzu vsech radku kodu, pole radku musi zacinat retezcem: .IPPcode18 (v jakekoliv velikosti vsech pismen), nasledne dojde k rozdeleni vsech radku podle mezer a kazdy "retezec" se zkontroluje vuci lexikalnim pravidlum.
+	 * Pokud dojde k lexikalni chybe, je zavolana funkce throwException s navratovym kodem 21
+	 *
+	 * @return Token[] Pole tokenu, ktere bylo zanalizovano
 	 */
 	public function analyse() {
 		if (count($this->arrayOfLines) > 0) {
+			// zdrojovy kod musi zacinat retezcem: .IPPcode18
 			if (substr(strtoupper($this->arrayOfLines[0]), 0, 10) == ".IPPCODE18") {
 				$token = new Token("PROGRAM", "IPPcode18");
 				array_push($this->tokenArray, $token);
@@ -420,8 +421,10 @@ class Lex extends Singleton {
 				$previousToken = "";
 				for ($i = 0; $i < count($rowArray); $i++) {
 					switch($rowArray[$i]) {
+						// instrukce
 						case in_array(strtoupper($rowArray[$i]), $this->arrayOfInstructions):
 							if (preg_match('/(INSTRUCTION\.)(CALL|LABEL|JUMP|JUMPIFEQ|JUMPIFNEQ)/', $previousToken) == true) {
+								// kontrola pro navesti se stejnym jmenem jako nazev instrukce
 								if (preg_match('/^[%|_|\-|\$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) == true) {
 									$token = new Token("LABEL", $rowArray[$i]);
 								} else {
@@ -434,29 +437,37 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							$previousToken = $token->getType().".".$token->getContent();
 							break;
+						// promenne
 						case (preg_match('/^(LF|TF|GF)@[%|_|\-|\$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("VAR", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
+						// string
 						case (preg_match('/^(string)@[\S]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
+						// int
 						case(preg_match('/^(int)@[\-|\+|0-9]+[0-9]*$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
+						// bool
 						case(preg_match('/^(bool)@(true|false)$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
+						// komentare
 						case (preg_match('/#(.*)/', $rowArray[$i]) ? true : false):
 							// comments
 							$this->setAmountOfComments($this->getAmountOfComments()+1);
 							break 2;
+						// navesti a typove oznaceni
 						case (preg_match('/^[%|_|\-|\$|&|\*|A-z]{1}[%|_|\-|\$|&|\*|A-z|0-9]+$/', $rowArray[$i]) ? true : false):
+							// typ
 							if (preg_match('/^(int|string|bool)$/', $rowArray[$i]) == true) {
 								$token = new Token("TYPE", $rowArray[$i]);
+							// navesti
 							} else {
 								$token = new Token("LABEL", $rowArray[$i]);
 							}
@@ -479,12 +490,14 @@ class Lex extends Singleton {
 
 
 /**
- * Class Syntax
+ * Trida Syntax
+ *
+ *
  */
 class Syntax extends Singleton {
 
 	/**
-	 * @var array
+	 * @var string[][] Pole syntaktickych pravidel pro vsechny instrukce z jazyka IPPcode18
 	 */
 	private $syntaxRules = array(
 		"MOVE" => array("VAR", "SYMB"),
@@ -524,27 +537,29 @@ class Syntax extends Singleton {
 	);
 
 	/**
-	 * @var array
+	 * @var string[] Zastupne pole pro "SYMB" znacku, pro usetreni prace pri prochazeni pole argumentu instrukci
 	 */
 	private $symbs = array("VAR", "CONSTANT");
 
 	/**
-	 * @var Token[]
+	 * @var Token[] Pole tokenu
 	 */
 	private $arrayOfTokens;
 
 	/**
-	 * Syntax constructor.
+	 * Konstruktor tridy Syntax
 	 *
-	 * @param $tokenArray
+	 * @param Token[] $tokenArray Pole tokenu
 	 */
 	public function __construct($tokenArray) {
 		$this->arrayOfTokens = $tokenArray;
 	}
 
 	/**
-	 * @param Token[] $arrayOfTokens
-	 * @return array
+	 * Funkce provede osekani pole od duplicitnich tokenu typu "NEWLINE", ktere byly vytvoreny u prazdnych radku. Jsou mazany pouze dva a vice "NEWLINE" tokenu za sebou, pricemz zustane pouze jeden
+	 *
+	 * @param Token[] $arrayOfTokens Pole tokenu
+	 * @return Token[] Pole osekane o duplicitni "NEWLINE" tokeny
 	 */
 	private function cleanDuplicateNewLines($arrayOfTokens) {
 		$cleanedArray = array();
@@ -562,9 +577,11 @@ class Syntax extends Singleton {
 	}
 
 	/**
-	 * @param Token[] $tokenArray
-	 * @param $start
-	 * @return integer
+	 * Funkce prochazi zdrojovy kod a scita pocet jednotlivych tokenu dokud nenarazi na "NEWLINE" token, ktery urcuje konec radku.
+	 *
+	 * @param Token[] $tokenArray Pole tokenu
+	 * @param integer $start Pocatecni index v poli tokenu
+	 * @return integer Pocet argumentu ktere byly nalezeny ve zdrojovem kodu od $start po "NEWLINE" token.
 	 */
 	private function getAmountOfArguments($tokenArray, $start) {
 		$amount = 0;
@@ -577,6 +594,8 @@ class Syntax extends Singleton {
 	}
 
 	/**
+	 * Funkce provadi
+	 *
 	 * @param Token[] $tokenArray
 	 * @param $start
 	 * @param $amount
@@ -618,6 +637,9 @@ class Syntax extends Singleton {
 	}
 
 	/**
+	 * Funkce provadi syntaktickou analyzu kodu, nejprve zkontroluje ze se jedna o korektni instrukci nebo pocatecni stav, pripadne NEWLINE ktery preskoci
+	 * Pokud se jedna o INSTRUKCI, zkontroluje pocet argumentu ocekavanych a obdrzenych, po uspesne kontrole argumentu provede samotnou syntaktickou analyzu kontrolou argumentu instrukci
+	 * Pokud dojde k chybe pri overovani podminek, zavola se funkce throwException, ktera ukonci program s navratovym kodem 21
 	 *
 	 */
 	public function analyse() {
@@ -643,8 +665,10 @@ class Syntax extends Singleton {
 	}
 
 	/**
-	 * @param Token $inputToken
-	 * @return boolean|mixed
+	 * Funkce ziska pole ocekavanych argumentu pro zadanou instrukci
+	 *
+	 * @param Token $inputToken Token obsahujici instrukci, pro kterou budou hledana pravidla
+	 * @return string[]|boolean Pole pravidel pro danou instrukci, nebo false pokud neexistuje platna instrukce
 	 */
 	private function getRules(Token $inputToken) {
 		foreach ($this->syntaxRules as $key => $rules) {
@@ -656,8 +680,10 @@ class Syntax extends Singleton {
 	}
 
 	/**
-	 * @param Token $inputToken
-	 * @return integer
+	 * Funkce vraci pocet pravidel, ktere jsou pro dany token ocekavany
+	 *
+	 * @param Token $inputToken Token obsahujici instrukci, pro kterou bude hledan pocet pravidel
+	 * @return integer Pocet pravidel, -1 pro neexistujici pravidlo, jinak vrati korektni pocet pravidel z pole tridni promenne $syntaxRules
 	 */
 	private function getAmountOfRules($inputToken) {
 		foreach ($this->syntaxRules as $key => $rules) {
@@ -671,27 +697,29 @@ class Syntax extends Singleton {
 
 
 /**
- * Class Stats
+ * Trida Stats
  */
 class Stats extends Singleton {
 
 	/**
-	 * @var
+	 * @var string Nazev souboru statistik
 	 */
 	private $file;
 	/**
-	 * @var
+	 * @var boolean[] Pole znacek urcujici povolovani statistik pro jednotlive parametry
 	 */
 	private $flags;
 	/**
-	 * @var
+	 * @var string Parametr urcuje prioritu vypisu statistik
 	 */
 	private $first;
 
 	/**
-	 * @param $statsFile
-	 * @param array $arrayOfFlags
-	 * @param $first
+	 * Konstruktor tridy Stats
+	 *
+	 * @param string $statsFile Soubor pro statistiky
+	 * @param boolean[] $arrayOfFlags Pole znacek, urcujici ktera ze statistik je povolena
+	 * @param string $first Parametr obsahuje "L" nebo "C", urcuje ktera ze statistik se do souboru ulozi prvni - L: pocet radku s kodem, C: pocet radku obsahujici komentar
 	 */
 	public function __construct($statsFile, $arrayOfFlags, $first) {
 		$this->file = $statsFile;
@@ -700,28 +728,28 @@ class Stats extends Singleton {
 	}
 
 	/**
-	 * @return mixed
+	 * @return string Soubor pro statistiky
 	 */
 	public function getFile() {
 		return $this->file;
 	}
 
 	/**
-	 * @param mixed $file
+	 * @param string $file Soubor pro statistiky
 	 */
 	public function setFile($file) {
 		$this->file = $file;
 	}
 
 	/**
-	 * @return mixed
+	 * @return boolean[] Pole znacek ve tvaru L|C, urcuje ktera ze statistik bude vytvorena
 	 */
 	public function getFlags() {
 		return $this->flags;
 	}
 
 	/**
-	 * @param mixed $flags
+	 * @param string[] $flags Pole znacek ve tvaru L|C, urcuje ktera ze statistik bude vytvorena
 	 */
 	public function setFlags($flags) {
 		$this->flags = $flags;
@@ -735,15 +763,15 @@ class Stats extends Singleton {
 	}
 
 	/**
-	 * @param $first string Hodnota "L" nebo "C" urcujici ktery z parametru bude v souboru vytisten prvni
+	 * @param string $first Hodnota "L" nebo "C" urcujici ktery z parametru bude v souboru vytisten prvni
 	 */
 	public function setFirst($first) {
 		$this->first = $first;
 	}
 
 	/**
-	 * @param $amountOfLinesOfCode integer Pocet radku kodu
-	 * @param $amountOfComments integer Pocet radku na kterych se vyskytoval komentar
+	 * @param integer $amountOfLinesOfCode Pocet radku kodu
+	 * @param integer $amountOfComments Pocet radku na kterych se vyskytoval komentar
 	 */
 	public function saveToFile($amountOfLinesOfCode, $amountOfComments) {
 		if ($this->getFlags()[0] && $this->getFlags()[1]) {
@@ -763,7 +791,7 @@ class Stats extends Singleton {
 
 
 /**
- * Class XML
+ * Trida XML
  */
 class XML extends Singleton {
 
@@ -778,7 +806,7 @@ class XML extends Singleton {
 	private $amountOfInstructions;
 
 	/**
-	 * XML konstruktor
+	 * Konstruktor tridy XML
 	 *
 	 * @param $instructions[] Pole instrukci
 	 */
@@ -789,7 +817,7 @@ class XML extends Singleton {
 	/**
 	 * Funkce provede konverzi znaku &, > a < ve stringu, ktery se ulozi do XML za ucelem maximalni kompatibility
 	 *
-	 * @param $string string Upravovany retezec
+	 * @param string $string Upravovany retezec
 	 * @return string Upraveny retezec
 	 */
 	private function convertStringLiterals($string) {
@@ -801,7 +829,7 @@ class XML extends Singleton {
 	}
 
 	/**
-	 * @param $amount integer Pocet instrukci
+	 * @param integer $amount Pocet instrukci
 	 */
 	private function setAmountOfInstructions($amount) {
 		$this->amountOfInstructions = $amount;
