@@ -8,6 +8,8 @@
 
 /*
  * Trida Singleton
+ *
+ * Slouzi jako globalni trida pro globalni funkce a promenne
  */
 class Singleton {
 
@@ -57,36 +59,38 @@ class Singleton {
 
 /**
  * Trida Parser
+ *
+ * Provadi analyzu vstupnich dat, tedy jak argumentu tak vstupu ze STDIN pro dalsi analyzu zdrojoveho kodu
  */
 class Parser extends Singleton {
 
 	/**
-	 * @var boolean
+	 * @var boolean Znacka urcujici zda byl zadan argument --help
 	 */
 	private $hF;
 	/**
-	 * @var boolean
+	 * @var boolean Znacka urcujici zda budou statistiky vubec ukladany
 	 */
 	private $sF;
 	/**
-	 * @var boolean
+	 * @var boolean Znacka urcujici zda budou statistiky pro pocet radku kodu ukladany
 	 */
 	private $lF;
 	/**
-	 * @var boolean
+	 * @var boolean Znacka urcujici zda budou statistiky pro pocet radku obsahujici komentar ukladany
 	 */
 	private $cF;
 	/**
-	 * @var string
+	 * @var string Soubor pro statistiky
 	 */
 	private $statsFile;
 	/**
-	 * @var string
+	 * @var string Znacka urcujici ktera ze statistik bude ulozena prvni: "L" pro pocet radku kodu nebo "C" pro pocet radku obsahujici komentar
 	 */
 	private $first;
 
 	/**
-	 * Parser constructor.
+	 * Konstruktor tridy Parser
 	 */
 	public function __construct() {
 		$this->statsFile = "";
@@ -97,93 +101,93 @@ class Parser extends Singleton {
 	}
 
 	/**
-	 * @return string
+	 * @return string Znacka urcujici ktera ze statistik bude ulozena prvni: "L" pro pocet radku kodu nebo "C" pro pocet radku obsahujici komentar
 	 */
 	public function getFirst() {
 		return $this->first;
 	}
 
 	/**
-	 * @param string $first
+	 * @param string $first Znacka urcujici ktera ze statistik bude ulozena prvni: "L" pro pocet radku kodu nebo "C" pro pocet radku obsahujici komentar
 	 */
 	public function setFirst($first) {
 		$this->first = $first;
 	}
 
 	/**
-	 * @return mixed
+	 * @return boolean Znacka urcujici zda byl zadan argument --help
 	 */
 	public function getHF() {
 		return $this->hF;
 	}
 
 	/**
-	 * @param mixed $hF
+	 * @param boolean $hF Znacka urcujici zda byl zadan argument --help
 	 */
 	public function setHF($hF) {
 		$this->hF = $hF;
 	}
 
 	/**
-	 * @return mixed
+	 * @return boolean Znacka urcujici zda budou statistiky vubec ukladany
 	 */
 	public function getSF() {
 		return $this->sF;
 	}
 
 	/**
-	 * @param mixed $sF
+	 * @param boolean $sF Znacka urcujici zda budou statistiky vubec ukladany
 	 */
 	public function setSF($sF) {
 		$this->sF = $sF;
 	}
 
 	/**
-	 * @return mixed
+	 * @return boolean Znacka urcujici zda budou statistiky pro pocet radku kodu ukladany
 	 */
 	public function getLF() {
 		return $this->lF;
 	}
 
 	/**
-	 * @param mixed $lF
+	 * @param boolean $lF Znacka urcujici zda budou statistiky pro pocet radku kodu ukladany
 	 */
 	public function setLF($lF) {
 		$this->lF = $lF;
 	}
 
 	/**
-	 * @return mixed
+	 * @return boolean Znacka urcujici zda budou statistiky pro pocet radku obsahujici komentar ukladany
 	 */
 	public function getCF() {
 		return $this->cF;
 	}
 
 	/**
-	 * @param mixed $cF
+	 * @param boolean $cF Znacka urcujici zda budou statistiky pro pocet radku obsahujici komentar ukladany
 	 */
 	public function setCF($cF) {
 		$this->cF = $cF;
 	}
 
 	/**
-	 * @return string
+	 * @return string Soubor pro ulozeni statistik
 	 */
 	public function getStatsFile() {
 		return $this->statsFile;
 	}
 
 	/**
-	 * @param string $statsFile
+	 * @param string $statsFile Soubor pro ulozeni statistik
 	 */
 	public function setStatsFile($statsFile) {
 		$this->statsFile = $statsFile;
 	}
 
 	/*
-	 * Function is reading the text from STDIN
+	 * Funkce cte data ze vstupu a uklada je do jednoho retezce, ktery je pote rozdelen podle radku a vracen jako pole radku
 	 *
-	 * @return string[] $input Text from STDIN is converted into string and returned, if no chars were read, function returns blank string
+	 * @return string[] $input Vstupni text prekonvertovany do pole radku
 	 */
 	public function readFromStdinToInput() {
 		$input = "";
@@ -197,6 +201,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Tato funkce provadi tisk napovedy a ukonceni programu
 	 *
 	 */
 	public function printHelp() {
@@ -216,8 +221,11 @@ class Parser extends Singleton {
 	}
 
 	/**
-	 * @param $argc
-	 * @param $argv
+	 * Funkce provede analyzu argumentu predanych pri spusteni, nastavi jednotlive znacky pro statistiky, napovedu a jine.
+	 * Pokud dojde k chybe pri analyze (duplicitni argumenty, nevalidni kombinace), je zavolana funkce throwException a je vracen chybovy kod 10
+	 *
+	 * @param integer $argc Pocet argumentu predanych programu
+	 * @param string[] $argv Pole argumentu predanych programu
 	 */
 	public function parseArguments($argc, $argv) {
 		if ($argc != 1) {
@@ -256,24 +264,28 @@ class Parser extends Singleton {
 
 
 /**
- * Class Token
+ * Trida Token
+ *
+ * Tato trida definuje objekt typu Token, ktery je vyuzit pro syntaktickou analyzu, tokeny jsou tvoreny z instrukci, promennych, navesti a typovych hodnot
+ * Kazdy token ma svuj typ $type a obsah $content, typem je myslena instrukce, promenna, navesti, typove urceni a konstanty
+ * Obsah je slozen z obsahu textu, ktery byl pri tvorbe predan, u instrukci je to nazev instrukce, u promennych je to nazev ramce a promenne, atd.
  */
 class Token {
 
 	/**
-	 * @var
+	 * @var string Oznaceni typu tokenu
 	 */
 	private $type;
 	/**
-	 * @var null
+	 * @var string|null Obsah promenne, defaultne NULL
 	 */
 	private $content;
 
 	/**
-	 * Token constructor.
+	 * Konstruktor tridy|objektu Token
 	 *
-	 * @param $type
-	 * @param $content
+	 * @param string $type Typ tokenu
+	 * @param string|null $content Obsah tokenu
 	 */
 	public function __construct($type, $content = NULL) {
 		$this->type = $type;
@@ -281,28 +293,28 @@ class Token {
 	}
 
 	/**
-	 * @return mixed
+	 * @return string Typ tokenu
 	 */
 	public function getType() {
 		return $this->type;
 	}
 
 	/**
-	 * @param mixed $type
+	 * @param string $type Typ tokenu
 	 */
 	public function setType($type) {
 		$this->type = $type;
 	}
 
 	/**
-	 * @return null
+	 * @return string|null Obsah tokenu
 	 */
 	public function getContent() {
 		return $this->content;
 	}
 
 	/**
-	 * @param null $content
+	 * @param string|null $content Obsah tokenu
 	 */
 	public function setContent($content) {
 		$this->content = $content;
@@ -312,21 +324,23 @@ class Token {
 
 /**
  * Trida Lex
+ *
+ * Provadi lexikalni analyzu zdrojoveho kodu, ktery byl ziskan ve tride Parser. Vytvari jednotlive tokeny, ktere jsou predany syntaktickemu analyzatoru
  */
 class Lex extends Singleton {
 
 	/**
-	 * @var int
+	 * @var integer Pocet radku obsahujici komentar
 	 */
 	private $comments;
 
 	/**
-	 * @var
+	 * @var string[] Pole radku ktere bude lexikalne analyzovano
 	 */
 	private $arrayOfLines;
 
 	/**
-	 * @var Token[]
+	 * @var Token[] Pole tokenu pro syntaktickou analyzu
 	 */
 	private $tokenArray;
 
@@ -341,6 +355,8 @@ class Lex extends Singleton {
 	/**
 	 * Konstruktor tridy Lex
 	 *
+	 * Provadi inicializaci tridnich promennych arrayOfLines, tokenArray a comments
+	 *
 	 * @param string[] $arrayOfLines Pole radku ze standardniho vstupu
 	 */
 	public function __construct($arrayOfLines) {
@@ -350,22 +366,24 @@ class Lex extends Singleton {
 	}
 
 	/**
-	 * @return mixed
+	 * @return integer Pocet radku obsahujici komentar
 	 */
 	public function getAmountOfComments() {
 		return $this->comments;
 	}
 
 	/**
-	 * @param mixed $comments
+	 * @param integer Pocet radku obsahujici komentar
 	 */
 	private function setAmountOfComments($comments) {
 		$this->comments = $comments;
 	}
 
 	/**
-	 * @param $array
-	 * @return array
+	 * Funkce provede kontrolu a kraceni pole o prazdne radky
+	 *
+	 * @param string[] $array Pole ktere bude orezano
+	 * @return array Pole orezane o prazdne radky
 	 */
 	private function cleanArray($array) {
 		$cleanedArray = array();
@@ -379,15 +397,17 @@ class Lex extends Singleton {
 	}
 
 	/**
-	 * @param $array
-	 * @return array
+	 * Funkce provede kontrolu zda se ve zdrojovem kodu nenachazi ihned za zdrojovym kodem komentar (bez mezery), usnadni nam lexikalni analyzu komentaru
+	 *
+	 * @param string[] $wordArray Radek transformovany do pole, ve kterem je komentar napsan primo za zdrojovym kodem, bez mezery
+	 * @return string[] Pole slov v radku s komentari oddelenymi od zdrojoveho kodu
 	 */
-	private function splitComments($array) {
+	private function splitComments($wordArray) {
 		$newArray = array();
-		foreach ($array as $key => $word) {
+		foreach ($wordArray as $key => $word) {
 			if (preg_match('/#(.*)/', $word)) {
-				array_push($newArray, substr($word,0, strpos($word, "#"))); // instruction
-				array_push($newArray, substr($word, strpos($word, "#"))); // comment
+				array_push($newArray, substr($word,0, strpos($word, "#"))); // instrukce
+				array_push($newArray, substr($word, strpos($word, "#"))); // komentar
 				break;
 			} else {
 				array_push($newArray, $word);
@@ -492,7 +512,7 @@ class Lex extends Singleton {
 /**
  * Trida Syntax
  *
- *
+ * Provadi syntaktickou analyzu zdrojoveho kodu, ktery je slozen z tokenu, ktere byly vytvoreny v tride Lex.
  */
 class Syntax extends Singleton {
 
@@ -556,10 +576,10 @@ class Syntax extends Singleton {
 	}
 
 	/**
-	 * Funkce provede osekani pole od duplicitnich tokenu typu "NEWLINE", ktere byly vytvoreny u prazdnych radku. Jsou mazany pouze dva a vice "NEWLINE" tokenu za sebou, pricemz zustane pouze jeden
+	 * Funkce provede orezani pole od duplicitnich tokenu typu "NEWLINE", ktere byly vytvoreny u prazdnych radku. Jsou mazany pouze dva a vice "NEWLINE" tokenu za sebou, pricemz zustane pouze jeden
 	 *
 	 * @param Token[] $arrayOfTokens Pole tokenu
-	 * @return Token[] Pole osekane o duplicitni "NEWLINE" tokeny
+	 * @return Token[] Pole orezane o duplicitni "NEWLINE" tokeny
 	 */
 	private function cleanDuplicateNewLines($arrayOfTokens) {
 		$cleanedArray = array();
@@ -594,12 +614,15 @@ class Syntax extends Singleton {
 	}
 
 	/**
-	 * Funkce provadi
+	 * Funkce provadi overeni spravnosti argumentu u zadane instrukce na indexu $start v poli $tokenArray, toto overeni provadi pro argumenty ktere jsou az po prvek $start+$amount
+	 * Nejprve je zkontrolovan pocet argumentu a ocekavany pocet argumentu instrukce, nasledne se projde cele pole od pocatecniho indexu $start po $start+$amount.
+	 * Pokud jsou argumenty v souladu s pravidly z tridni promenne pole $syntaxRules, analyza probehla v poradku, jinak se se navrati false
+	 * Pokud dojde k chybe pri analyze, dojde k zavolani funkce throwException, ktera ale neukonci program a nasledne se navrati chybovy stav
 	 *
-	 * @param Token[] $tokenArray
-	 * @param $start
-	 * @param $amount
-	 * @return boolean
+	 * @param Token[] $tokenArray Pole tokenu
+	 * @param integer $start Pocatecni index na kterem je umistena instrukce
+	 * @param integer $amount Pocet prvku, ktere budou pro danou instrukci kontorlovany
+	 * @return boolean Pokud analyza probehne v poradku, navrati se true, jinak false
 	 */
 	private function checkArguments($tokenArray, $start, $amount) {
 		$amountOfArguments = $this->getAmountOfArguments($tokenArray, $start);
@@ -638,27 +661,27 @@ class Syntax extends Singleton {
 
 	/**
 	 * Funkce provadi syntaktickou analyzu kodu, nejprve zkontroluje ze se jedna o korektni instrukci nebo pocatecni stav, pripadne NEWLINE ktery preskoci
-	 * Pokud se jedna o INSTRUKCI, zkontroluje pocet argumentu ocekavanych a obdrzenych, po uspesne kontrole argumentu provede samotnou syntaktickou analyzu kontrolou argumentu instrukci
+	 * Pokud se jedna o INSTRUKCI, zkontroluje pocet pravidel pro danou instrukci, po uspesne kontrole instrukce provede samotnou syntaktickou analyzu kontrolou argumentu instrukci
 	 * Pokud dojde k chybe pri overovani podminek, zavola se funkce throwException, ktera ukonci program s navratovym kodem 21
 	 *
 	 */
 	public function analyse() {
 		$this->arrayOfTokens = $this->cleanDuplicateNewLines($this->arrayOfTokens);
 		for ($i = 0; $i < count($this->arrayOfTokens); $i++) {
-			if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") {
-				if (($amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i])) < 0) {
+			if ($this->arrayOfTokens[$i]->getType() == "INSTRUCTION") { // pokud je prvni token INSTRUKCE, provedeme analyzu
+				if (($amountOfArguments = $this->getAmountOfRules($this->arrayOfTokens[$i])) < 0) { // zkontrolujeme pocet pravidel (overeni validity instrukce pro jazyk)
 					$this->throwException(21, "Given amount of arguments: ".$amountOfArguments, false);
 					$this->throwException(21, "SYNTAX error analysis!", true);
 				} else {
-					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) {
+					if (!($this->checkArguments($this->arrayOfTokens, $i, $amountOfArguments))) { // overime validity argumentu pro danou instrukci (samotna syntakticka analyza)
 						$this->throwException(21, "Wrong amount of arguments for instruction: ".$this->arrayOfTokens[$i]->getContent(), false);
 						$this->throwException(21, "SYNTAX error analysis!", true);
 					}
 					$i += $amountOfArguments;
 				}
-			} else if ($this->arrayOfTokens[$i]->getType() == "NEWLINE" || $this->arrayOfTokens[$i]->getType() == "PROGRAM") {
+			} else if ($this->arrayOfTokens[$i]->getType() == "NEWLINE" || $this->arrayOfTokens[$i]->getType() == "PROGRAM") { // pokud se jedna o novy radek nebo uvodni radek s urcenim programu, provedeme dalsi iteraci
 				continue;
-			} else {
+			} else { // jinak vratime chybovy stav
 				$this->throwException(21, "SYNTAX error analysis!", true);
 			}
 		}
@@ -698,6 +721,8 @@ class Syntax extends Singleton {
 
 /**
  * Trida Stats
+ *
+ * Ze znacek z Parseru a ze statistik ktere jsou ziskany pri analyze vytvari soubor se statistikami
  */
 class Stats extends Singleton {
 
@@ -792,6 +817,8 @@ class Stats extends Singleton {
 
 /**
  * Trida XML
+ *
+ * Slouzi k tvorbe XML vystupu, ktery je tvoren z tokenu, ktere byly predany ze syntaktickeho analyzatoru
  */
 class XML extends Singleton {
 
@@ -849,23 +876,23 @@ class XML extends Singleton {
 	 */
 	public function generateXml() {
 		$instructions = $this->instructions;
-		$xmlProgram = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."<program></program>");
+		$xmlProgram = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"."<program></program>"); // hlavicka programu
 		$i = 0;
 		$instructionIterator = 0;
 		$argumentIterator = 1;
 		while ($i < count($instructions)) {
 			if ($instructions[$i]->getType() != "NEWLINE") {
 				if ($instructions[$i]->getType() == "PROGRAM") {
-					$xmlProgram->addAttribute('language', $instructions[0]->getContent());
+					$xmlProgram->addAttribute('language', $instructions[0]->getContent()); // element urcujici jazyk kodu
 				} else if ($instructions[$i]->getType() == "INSTRUCTION") {
 					$instructionIterator++;
-					$xmlInstruction = $xmlProgram->addChild('instruction');
+					$xmlInstruction = $xmlProgram->addChild('instruction'); // element urcujici instrukce
 					$xmlInstruction->addAttribute('order', $instructionIterator);
 					$xmlInstruction->addAttribute('opcode', $instructions[$i]->getContent());
 				} else {
 					if (isset($xmlInstruction)) {
 						$arg = "arg".$argumentIterator;
-						$xmlArgument = $xmlInstruction->addChild($arg);
+						$xmlArgument = $xmlInstruction->addChild($arg); // tvorba deti rodice $xmlInstruction
 						$xmlArgument->addAttribute('type', $instructions[$i]->getType());
 						$xmlArgument[0] = $this->convertStringLiterals($instructions[$i]->getContent());
 						$argumentIterator++;
@@ -873,6 +900,7 @@ class XML extends Singleton {
 				}
 				$i++;
 			} else {
+				// orezavani pole od jiz vygenerovanych xml instrukci a argumentu
 				while($i > 0) {
 					array_shift($instructions);
 					$i--;
@@ -886,25 +914,31 @@ class XML extends Singleton {
 	}
 }
 
+// analyza argumentu
 $parser = new Parser();
 $parser->parseArguments($argc, $argv);
 $parser->printHelp();
 $arrayOfLines = $parser->readFromStdinToInput();
 
+// lexikalni analyza vstupu
 $lex = new Lex($arrayOfLines);
 $tokens = $lex->analyse();
 
+// syntakticka analyza
 $syntax = new Syntax($tokens);
 $syntax->analyse();
 
+// generovani xml vystupu
 $xml = new XML($tokens);
 $xmlOutput = $xml->generateXml();
 
+// tvorba statistik
 if ($parser->getSF()) {
 	$stats = new Stats($parser->getStatsFile(), array($parser->getLF(), $parser->getCF()), $parser->getFirst());
 	$stats->saveToFile($xml->getAmountOfInstructions(), $lex->getAmountOfComments());
 }
 
+// formatovani xml vystupu
 $dom = dom_import_simplexml($xmlOutput)->ownerDocument;
 $dom->formatOutput = true;
 echo $dom->saveXml();
