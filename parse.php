@@ -232,15 +232,15 @@ class Parser extends Singleton {
 			for ($i = 1; $i < $argc; $i++) {
 				if (preg_match("/--help/", $argv[$i]) == 1 && $this->getHF() != true) {
 					$this->setHF(true);
-				} else if (preg_match("/--stats=.*/", $argv[$i]) == 1) {
+				} else if (preg_match("/--stats=.*/", $argv[$i]) == 1 && !$this->getSF()) {
 					$this->setSF(true);
 					$this->setStatsFile(substr($argv[$i], 8));
-				} else if (preg_match("/--loc/", $argv[$i]) == 1) {
+				} else if (preg_match("/--loc/", $argv[$i]) == 1 && !$this->getLF()) {
 					$this->setLF(true);
 					if($this->getFirst() == "") {
 						$this->setFirst("L");
 					}
-				} else if (preg_match("/--comments/", $argv[$i]) == 1) {
+				} else if (preg_match("/--comments/", $argv[$i]) == 1 && !$this->getCF()) {
 					$this->setCF(true);
 					if($this->getFirst() == "") {
 						$this->setFirst("C");
@@ -468,7 +468,7 @@ class Lex extends Singleton {
 							array_push($this->tokenArray, $token);
 							break;
 						// int
-						case(preg_match('/^(int)@[\-|\+|0-9]+[0-9]*$/', $rowArray[$i]) ? true : false):
+						case(preg_match('/^(int)@[\-|\+]?[0-9]+$/', $rowArray[$i]) ? true : false):
 							$token = new Token("CONSTANT", $rowArray[$i]);
 							array_push($this->tokenArray, $token);
 							break;
@@ -893,7 +893,7 @@ class XML extends Singleton {
 					if (isset($xmlInstruction)) {
 						$arg = "arg".$argumentIterator;
 						$xmlArgument = $xmlInstruction->addChild($arg); // tvorba deti rodice $xmlInstruction
-						$xmlArgument->addAttribute('type', $instructions[$i]->getType());
+						$xmlArgument->addAttribute('type', strtolower($instructions[$i]->getType()));
 						$xmlArgument[0] = $this->convertStringLiterals($instructions[$i]->getContent());
 						$argumentIterator++;
 					}
