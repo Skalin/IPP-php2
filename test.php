@@ -473,7 +473,7 @@ class TestBehavior extends Singleton {
 			}
 
 			$xml = implode($output, "\n");
-/*
+
 			if ($this->programExists($this->getInterpret())) {
 				exec('python3 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
 			} else {
@@ -493,7 +493,7 @@ class TestBehavior extends Singleton {
 				$test->setTestStatus($this->testResults[2]);
 				continue;
 			}
-*/
+
 		}
 		return $this->getTestArray();
 	}
@@ -583,7 +583,8 @@ class HtmlGenerator extends Singleton {
 
 
 	/**
-	 * @return mixed
+	 *
+	 * @return Test[]
 	 */
 	public function getTestArray() {
 		return $this->testArray;
@@ -651,15 +652,22 @@ class HtmlGenerator extends Singleton {
 		}
 		$innerHtmlBack = "</table>";
 
-		$amountOfFailedTests = $failed / $amountOfTests;
-		$amountOfSuccessfulTests = 1 - $amountOfFailedTests;
-
-		$statsHtml = "<p>Bylo provedeno ".$amountOfTests." testů. Z nichž bylo <span class='success'>".($amountOfSuccessfulTests*100)."% </span> (<span class='success'>".$successful."</span>) úspěšných a <span class='failed'>".($amountOfFailedTests*100)." %</span> (<span class='failed'>".$failed."</span>) neúspěšných</p>";
-
+		if ($amountOfTests != 0) {
+			$amountOfFailedTests = $failed / $amountOfTests;
+			$amountOfSuccessfulTests = 1 - $amountOfFailedTests;
+		} else {
+			$amountOfFailedTests = 0;
+			$amountOfSuccessfulTests = 0;
+		}
+		$statsHtml = "<p>Bylo provedeno ".$amountOfTests." testů.";
+		if ($amountOfTests != 0) {
+			$statsHtml = $statsHtml."Z nichž bylo <span class='success'>".($amountOfSuccessfulTests*100)."% </span> (<span class='success'>".$successful."</span>) úspěšných a <span class='failed'>".($amountOfFailedTests*100)." %</span> (<span class='failed'>".$failed."</span>) neúspěšných";
+		}
+		$statsHtml = $statsHtml."</p>";
 		$output = $header.$innerHtmlHead.$innerHtmlBack.$statsHtml.$footer;
 
 		//TODO remove next line, we want only output to stdout..
-		file_put_contents("test.html", $output);
+		//file_put_contents("test.html", $output);
 		echo $output;
 	}
 }
