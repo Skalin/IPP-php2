@@ -24,19 +24,21 @@ class Singleton {
 	}
 
 	/**
-	 * Function for throwing exceptions and stopping the script
+	 * Funkce slouzici pro tisk chybovych zprav. Pokud je zavolana s parametrem $killable, ktery je true, funkce ukonci chovani skriptu
 	 *
-	 * @param int $errorCode selector of type of error
-	 * @param string $errorText Depending on this value function selects which type i will echo
-	 * @param bool $verbose value selects whether to echo error or not.
+	 * @param integer $errorCode Ciselna hodnota chyboveho stavu
+	 * @param string $errorText Obsah chyboveho hlaseni
+	 * @param boolean $killable Parametr urcujici zda dojde k ukonceni skriptu - pokud je true, skript se ukonci, jinak ne
 	 */
 
-	public function throwException($errorCode, $errorText, $verbose) {
-		if ($verbose) {
-			fwrite(STDERR, "ERROR: ".$errorText."\n");
-			fwrite(STDERR,"Please, consider looking for help, run script as: ".__DIR__."/".$this->fileName." --help\n");
+	public function throwException($errorCode, $errorText, $killable) {
+
+		fwrite(STDERR, "ERROR: ".$errorText."\n");
+
+		if ($killable) {
+			fwrite(STDERR, "Please, consider looking for help, run script as: " . __DIR__ . "/" . $this->fileName . " --help\n");
+			exit($errorCode);
 		}
-		exit($errorCode);
 	}
 }
 
