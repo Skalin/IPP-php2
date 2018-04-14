@@ -43,7 +43,7 @@ class Singleton {
 }
 
 
-class Common extends Singleton {
+class Parser extends Singleton {
 
 	private $argumentCount;
 	private $arguments;
@@ -675,17 +675,17 @@ class HtmlGenerator extends Singleton {
 }
 
 
-$common = new Common ($argc, $argv);
-$common->parseArguments();
-$common->printHelp();
+$parser = new Parser ($argc, $argv);
+$parser->parseArguments();
+$parser->printHelp();
 
-$testDir = new TestDirectory($common->isRF());
-$tests = $testDir->createTests($common->getDirPath());
+$testDir = new TestDirectory($parser->isRF());
+$tests = $testDir->createTests($parser->getDirPath());
 
-$testBehavior = new TestBehavior($tests, $common->getParsePath(), $common->getInterpretPath());
+$testBehavior = new TestBehavior($tests, $parser->getParsePath(), $parser->getInterpretPath());
 $tests = $testBehavior->testBehavior();
 
-$html = new HtmlGenerator($tests, $common->getDirPath(), $common->getParsePath(), $common->getInterpretPath(), $common->getArguments());
+$html = new HtmlGenerator($tests, $parser->getDirPath(), $parser->getParsePath(), $parser->getInterpretPath(), $parser->getArguments());
 $stylised = true; // enable styles
 $html->generateHtml($stylised);
 
