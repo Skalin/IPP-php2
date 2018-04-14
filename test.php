@@ -11,31 +11,31 @@
 	 *
 	 * Slouzi jako globalni trida pro globalni funkce a promenne
 	 */
-	class Singleton {
+class Singleton {
 
-		/**
-		 * @var string Nazev analyzatoru
-		 */
-		private $fileName = "test.php";
+	/**
+	 * @var string Nazev analyzatoru
+	 */
+	private $fileName = "test.php";
 
-		/**
-		 * Konstruktor tridy Singleton
-		 */
-		private function __construct() {
+	/**
+	 * Konstruktor tridy Singleton
+	 */
+	private function __construct() {
 
+	}
+
+	/**
+	 * @return Singleton Instance tridy Singleton
+	 */
+	public static function Instance()
+	{
+		static $inst = null;
+		if ($inst === null) {
+			$inst = new Singleton();
 		}
-
-		/**
-		 * @return Singleton Instance tridy Singleton
-		 */
-		public static function Instance()
-		{
-			static $inst = null;
-			if ($inst === null) {
-				$inst = new Singleton();
-			}
-			return $inst;
-		}
+		return $inst;
+	}
 
 	/**
 	 * Funkce slouzici pro tisk chybovych zprav. Pokud je zavolana s parametrem $killable, ktery je true, funkce ukonci chovani skriptu
