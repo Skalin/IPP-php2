@@ -6,22 +6,36 @@
  * Time: 16:11
  */
 
-class Singleton {
+	/*
+	 * Trida Singleton
+	 *
+	 * Slouzi jako globalni trida pro globalni funkce a promenne
+	 */
+	class Singleton {
 
-	private $fileName = "test.php";
+		/**
+		 * @var string Nazev analyzatoru
+		 */
+		private $fileName = "test.php";
 
-	private function __construct() {
+		/**
+		 * Konstruktor tridy Singleton
+		 */
+		private function __construct() {
 
-	}
-
-	public static function Instance()
-	{
-		static $inst = null;
-		if ($inst === null) {
-			$inst = new Singleton();
 		}
-		return $inst;
-	}
+
+		/**
+		 * @return Singleton Instance tridy Singleton
+		 */
+		public static function Instance()
+		{
+			static $inst = null;
+			if ($inst === null) {
+				$inst = new Singleton();
+			}
+			return $inst;
+		}
 
 	/**
 	 * Funkce slouzici pro tisk chybovych zprav. Pokud je zavolana s parametrem $killable, ktery je true, funkce ukonci chovani skriptu
@@ -42,20 +56,69 @@ class Singleton {
 	}
 }
 
-
+	/**
+	 * Trida Parser
+	 *
+	 * Provadi analyzu vstupnich dat, tedy zejmena argumentu
+    */
 class Parser extends Singleton {
 
+	/*
+	 * @var integer Pocet argumentu zadanych na vstupu skriptu
+	 */
 	private $argumentCount;
+
+	/*
+	 * @var string[] Pole argumentu programu
+	 */
 	private $arguments;
+
+	/**
+	 * @var boolean Znacka urcujici zda byl zadan argument --help
+	 */
 	private $hF;
+
+	/*
+	 * @var string slozka ve ktere jsou testy ulozeny
+	 */
 	private $dirPath;
+
+	/*
+	 * @var boolean znacka urcujici zda bude provadeno rekurzivni prohledavani
+	 */
 	private $rF;
+
+	/*
+	 * @var boolean znacka urcujici zda byl zadan --interpret parametr
+	 */
 	private $iF;
+
+	/*
+	 * @var boolean znacka urcujici zda byl zadan parametr --directory
+	 */
 	private $dF;
+
+	/*
+	 * @var boolean znacka urcujici zda byl zadan --parse parametr
+	 */
 	private $pF;
+
+	/*
+	 * @var string cesta k lexikalnimu analyzatoru jazyka IPPcode18
+	 */
 	private $parsePath;
+
+	/*
+	 * @var string cesta k interpretu jazyka IPPcode18
+	 */
 	private $interpretPath;
 
+	/**
+	 * Konstruktor tridy Parser
+	 *
+	 * @param int $argc pocet argumentu
+	 * @param string[] $argv pole argumentu
+	 */
 	public function __construct($argc, $argv) {
 		$this->argumentCount = $argc;
 		$this->arguments = $argv;
@@ -70,6 +133,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Tato funkce provadi tisk napovedy a ukonceni programu
 	 *
 	 */
 	public function printHelp() {
@@ -84,6 +148,7 @@ class Parser extends Singleton {
 		}
 	}
 	/**
+	 * Getter pro tridni promennou hF
 	 * @return bool
 	 */
 	public function isHF() {
@@ -91,6 +156,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Setter pro tridni promennou $hF
 	 * @param bool $hF
 	 */
 	public function setHF($hF) {
@@ -98,13 +164,15 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Getter pro tridni promennou $dirPath
 	 * @return string
 	 */
 	public function getDirPath() {
 		return $this->dirPath;
 	}
 
-	/**
+	/**]
+	 * Setter pro tridni promennou $dirPath
 	 * @param string $dirPath
 	 */
 	public function setDirPath($dirPath) {
@@ -112,6 +180,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Getter pro tridni promennou iF
 	 * @return bool
 	 */
 	public function isIF() {
@@ -119,6 +188,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Setter pro tridni promennou $iF
 	 * @param bool $iF
 	 */
 	public function setIF($iF) {
@@ -126,6 +196,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Getter pro tridni promennou pF
 	 * @return bool
 	 */
 	public function isPF() {
@@ -133,6 +204,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Setter pro tridni promennou $pF
 	 * @param bool $pF
 	 */
 	public function setPF($pF) {
@@ -140,6 +212,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Getter pro tridni promennou dF
 	 * @return bool
 	 */
 	public function isDF() {
@@ -147,6 +220,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Setter pro tridni promennou $dF
 	 * @param bool $dF
 	 */
 	public function setDF($dF) {
@@ -154,7 +228,7 @@ class Parser extends Singleton {
 	}
 
 	/**
-	 *
+	 * Getter pro tridni promennou rF
 	 * @return bool
 	 */
 	public function isRF() {
@@ -162,6 +236,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Setter pro tridni promennou $rF
 	 * @param bool $rF
 	 */
 	public function setRF($rF) {
@@ -169,6 +244,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Getter pro tridni promennou $parsePath
 	 * @return string
 	 */
 	public function getParsePath() {
@@ -176,6 +252,7 @@ class Parser extends Singleton {
 	}
 
 	/**
+	 * Setter pro tridni promennou $parsePath
 	 * @param string $parsePath
 	 */
 	public function setParsePath($parsePath) {
@@ -183,33 +260,41 @@ class Parser extends Singleton {
 	}
 
 	/**
-	 * @return string
+	 * Getter pro tridni promennou $interpretPath
+	 * @return string interpretPath
 	 */
 	public function getInterpretPath() {
 		return $this->interpretPath;
 	}
 
 	/**
-	 * @param string $interpretPath
+	 * Setter pro tridni promennou $interpretPath
+	 * @param string $interpretPath cesta k interpretu
 	 */
 	public function setInterpretPath($interpretPath) {
 		$this->interpretPath = $interpretPath;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $argumentCount
+	 * @return integer argumentCount
 	 */
 	public function getArgumentCount() {
 		return $this->argumentCount;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $arguments
+	 * @return string[] arguments
 	 */
 	public function getArguments() {
 		return $this->arguments;
 	}
 
+	/**
+	 * Funkce provede analyzu argumentu predanych pri spusteni, nastavi jednotlive znacky pro statistiky, napovedu a jine.
+	 * Pokud dojde k chybe pri analyze (duplicitni argumenty, nevalidni kombinace), je zavolana funkce throwException a je vracen chybovy kod 10
+	 */
 	public function parseArguments() {
 		if ($this->argumentCount != 1) {
 			for ($i = 1; $i < $this->argumentCount; $i++) {
@@ -236,43 +321,69 @@ class Parser extends Singleton {
 		}
 	}
 }
-
+/*
+ * Trida Test
+ *
+ * Tato trida definuje jednotlive testy a jejich navratove hodnoty, vystupy, atd.
+ */
 class Test extends Singleton {
+
+	/*
+	 * @var string nazev testu
+	 */
 	private $name;
+
+	/*
+	 * @var integer ocekavany navratovy kod testu
+	 */
 	private $erc;
+
+	/*
+	 * @var string Vysledek testu
+	 */
 	private $testStatus;
+
+	/*
+	 * Cesta k parseru
+	 */
 	private $parser;
 	private $interpret;
 	private $resultCode;
 
-
+	/*
+	 * Konstruktor tridy Test
+	 */
 	public function __construct($name) {
 		$this->name = $name;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $name
+	 * @return string
 	 */
 	public function getName() {
 		return $this->name;
 	}
 
 	/**
-	 * @param mixed $name
+	 * Setter pro tridni promennou $name
+	 * @param string $name
 	 */
 	public function setName($name) {
 		$this->name = $name;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $erc
+	 * @return int ocekavany navratovy kod
 	 */
 	public function getErc() {
 		return $this->erc;
 	}
 
 	/**
-	 * @param mixed $erc
+	 * Setter pro tridni promennou $erc
+	 * @param string $erc
 	 */
 	public function setErc($erc) {
 		$this->erc = intval($erc);
@@ -286,55 +397,65 @@ class Test extends Singleton {
 	}
 
 	/**
-	 * @param mixed $testStatus
+	 * @param string $testStatus
 	 */
 	public function setTestStatus($testStatus) {
 		$this->testStatus = $testStatus;
 	}
 
 	/**
-	 * @return mixed
+	 * Setter pro tridni promennou $resultCode
+	 * @return string cesta k parseru
 	 */
 	public function getParser() {
 		return $this->parser;
 	}
 
 	/**
-	 * @param mixed $parser
+	 * Setter pro tridni promennou $parser
+	 * @param string $parser cesta k parseru
 	 */
 	public function setParser($parser) {
 		$this->parser = $parser;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $interpret
+	 * @return string cesta k interpretu
 	 */
 	public function getInterpret() {
 		return $this->interpret;
 	}
 
 	/**
-	 * @param mixed $interpret
+	 * Setter pro tridni promennou $interpret
+	 * @param string $interpret cesta k interpretu
 	 */
 	public function setInterpret($interpret) {
 		$this->interpret = $interpret;
 	}
 
-	/**
-	 * @param array $testResults
+	/*
+	 * Setter pro tridni promennou $resultCode
+	 * @param int $code navratovy kod testu
 	 */
-	public function setTestResults($testResults) {
-		$this->testResults = $testResults;
-	}
-
 	public function setResultCode($code) {
 		$this->resultCode = $code;
 	}
 
+	/*
+	 * Getter pro tridni promennou $resultCode
+	 * @return int navratovy kod testu
+	 */
 	public function getResultCode() {
 		return $this->resultCode;
 	}
 
+	/*
+	 * Funkce kontroluje jestli test.in existuje
+	 *
+	 * @return bool true pokud soubor exsistuje, jinak false
+	 */
 	public function inFileExists() {
 		if ((file_exists($this->getName().".in") && (is_dir($this->getName().".in"))) || (!file_exists($this->getName().".in"))) {
 			return false;
@@ -342,6 +463,11 @@ class Test extends Singleton {
 		return true;
 	}
 
+	/*
+	 * Funkce kontroluje jestli test.out existuje
+	 *
+	 * @return bool true pokud soubor exsistuje, jinak false
+	 */
 	public function outFileExists() {
 		if ((file_exists($this->getName().".out") && (is_dir($this->getName().".out"))) || (!file_exists($this->getName().".out"))) {
 			return false;
@@ -349,6 +475,11 @@ class Test extends Singleton {
 		return true;
 	}
 
+	/*
+	 * Funkce kontroluje jestli test.rc existuje
+	 *
+	 * @return bool true pokud soubor exsistuje, jinak false
+	 */
 	public function rcFileExists() {
 		if ((file_exists($this->getName().".rc") && (is_dir($this->getName().".rc"))) || (!file_exists($this->getName().".rc"))) {
 			return false;
@@ -356,24 +487,46 @@ class Test extends Singleton {
 		return true;
 	}
 
+	/*
+	 * Funkce generuje soubor test.in, s vychozim obsahem "\0"
+	 *
+	 * Pokud zapis selhal z jakehokoliv duvodu, vraci chybovy kod 12
+	 */
 	public function generateInFile() {
 		if ((file_put_contents($this->getName().".in", "\0")) == false) {
 			$this->throwException(12, "ERROR writing file", true);
 		}
 	}
 
+	/*
+		 * Funkce generuje soubor test.out, s vychozim obsahem "\0"
+		 *
+		 * Pokud zapis selhal z jakehokoliv duvodu, vraci chybovy kod 12
+		 */
 	public function generateOutFile() {
 		if ((file_put_contents($this->getName().".out", "\0")) == false) {
 			$this->throwException(12, "ERROR writing file", true);
 		}
 	}
 
+	/*
+	 * Funkce generuje soubor test.rc, s vychozim obsahem "0"
+	 *
+	 * Pokud zapis selhal z jakehokoliv duvodu, vraci chybovy kod 12
+	 */
 	public function generateRcFile() {
 		if ((file_put_contents($this->getName().".rc", "0\0")) == false) {
 			$this->throwException(12, "ERROR writing file", true);
 		}
 	}
 
+	/*
+	 * Funkce nacte obsah souboru test.rc
+	 *
+	 * Pokud soubor neexistuje vraci chybovy kod 12
+	 *
+	 * @return string $read precteny obsah souboru
+	 */
 	public function loadErcFromFile() {
 		if (($read = file_get_contents($this->getName().".rc")) == false) {
 			$this->throwException(12, "ERROR reading file", true);
@@ -381,23 +534,50 @@ class Test extends Singleton {
 		return $read;
 	}
 
+	/*
+	 * Funkce porovna navratovy kod s ocekavanym navratovym kodem a vraci true pokud se shoduji
+	 *
+	 * @param int $returnCode navratovy kod z analyzy / interpretace kodu
+	 * @return bool true pokud se shoduji, jinak false
+	 */
 	public function compareReturnCode($returnCode) {
 		return ($this->getErc() == $returnCode ? true : false);
 	}
 }
 
+/*
+ * Trida TestBehavior
+ *
+ * Spravuje chovani jednotlivych testu jako logickeho celku
+ */
 class TestBehavior extends Singleton {
+
+	/*
+	 * @var Test[] Pole testu
+	 */
 	private $testArray;
+
+	/*
+	 * @var string Cesta k lexikalnimu analyzatoru
+	 */
 	private $parser;
+
+	/*
+	 * @var string Cesta k interpretu jazyka IPPcode18
+	 */
 	private $interpret;
+
+	/*
+	 * Pole testovych vysledku, kazdy test nabyva pri inicializaci hodnoty "IGNORE", uspesny test nabyva hodnoty "SUCCESS" a neuspesny "FAIL"
+	 */
 	private $testResults = array("IGNORE", "SUCCESS", "FAIL");
 
 	/**
-	 * TestBehavior constructor.
+	 * TestBehavior konstruktor.
 	 *
-	 * @param array $testArray
-	 * @param $parser
-	 * @param $interpret
+	 * @param Test[] $testArray Pole testu
+	 * @param string $parser cesta ke skriptu analyzatoru
+	 * @param string $interpret cesta ke skriptu interpretu
 	 */
 	public function __construct(array $testArray, $parser, $interpret) {
 		$this->testArray = $testArray;
@@ -406,6 +586,7 @@ class TestBehavior extends Singleton {
 	}
 
 	/**
+	 * Getter pro tridni promennou $testArray
 	 * @return array
 	 */
 	private function getTestArray() {
@@ -413,19 +594,28 @@ class TestBehavior extends Singleton {
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $parser
+	 * @return string cesta k souboru analyzatoru
 	 */
 	private function getParser() {
 		return $this->parser;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro tridni promennou $interpret
+	 * @return string cesta k souboru interpretu
 	 */
 	private function getInterpret() {
 		return $this->interpret;
 	}
 
+	/*
+	 * FFunkce porovnava ocekavany vstup a realny vystup programu
+	 *
+	 * @param int $expectedOutput ocekavany vstup
+	 * @param int $givenOutput ziskany vstup
+	 * @return bool true pokud se shoduji, jinak false
+	 */
 	private function compareOutput($expectedOutput, $givenOutput) {
 		if (strcmp($expectedOutput, $givenOutput) == 0) {
 			return true;
@@ -434,12 +624,20 @@ class TestBehavior extends Singleton {
 		}
 	}
 
+	/*
+	 * Funkce vraci true pokud existuje soubor (skript)
+	 *
+	 * @param string $file cesta k souboru
+	 * @return bool true pokud soubor existuje, jinak false
+	 */
 	private function programExists($file) {
 		return (is_file($file) ? true : false);
 	}
 
 	/**
+	 * Funkce provede chovani testu jako logickeho celku, kazdy test ma jasne a stejne chovani ktere se da oznacit jako "Behavior"
 	 *
+	 * @return Test[] vysledne pole testu
 	 */
 	public function testBehavior() {
 		foreach ($this->getTestArray() as $test) {
@@ -501,19 +699,44 @@ class TestBehavior extends Singleton {
 	}
 }
 
+/*
+ * Trida TestDirectory
+ *
+ * Trida generujici pole testu z testovaci slozky
+ */
 class TestDirectory extends Singleton {
 
+	/*
+	 * @var bool znacka urcujici zda dochazi k rekurzivnimu prohledavani nebo ne
+	 */
 	private $recursive;
+
+	/*
+	 * @var Test[] pole testu, ktere se vygeneruje
+	 */
 	private $arrayOfTests = array();
 
+	/*
+	 * Konstruktor tridy TestDirectory
+	 */
 	public function __construct($recursive) {
 		$this->recursive = $recursive;
 	}
 
+	/*
+	 * Funkce urcuje zda dojde k rekurzivnimu prohledavani adresare s testy
+	 *
+	 * @returns boolean true pokud dojde k prohledavani, false pokud ne
+	 */
 	private function isRecursive() {
 		return $this->recursive ? true : false;
 	}
 
+	/*
+	 * Funkce vyhleda v dane slozce veskere testy a vytvori z nich objekty typu Test, ktere vlozi do pole testu a to navrati
+	 * @param string $dir cesta ve ktere budou testy hledany
+	 * @return Test[] pole testu
+	 */
 	public function createTests($dir) {
 		if (($files = scandir($dir)) == false) {
 			$this->throwException(10,"Directory is not a directory", true);
@@ -542,7 +765,11 @@ class TestDirectory extends Singleton {
 	}
 }
 
-
+/*
+ * Trida HtmlGenerator
+ *
+ * Provadi tvorbu a generovani vystupniho HTML, ktere je ucelne pro vysledek testu
+ */
 class HtmlGenerator extends Singleton {
 
 	/*
@@ -554,6 +781,9 @@ class HtmlGenerator extends Singleton {
 	private $interpret;
 	private $arguments;
 
+	/*
+	 * Konstruktor tridy HtmlGenerator
+	 */
 	public function __construct($testArray, $directory, $parser, $interpret, $arguments) {
 		$this->testArray = $testArray;
 		$this->directory = $directory;
@@ -563,21 +793,24 @@ class HtmlGenerator extends Singleton {
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro ziskani tridni promenne $directory
+	 * @return string
 	 */
 	public function getDirectory() {
 		return $this->directory;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro ziskani tridni promenne $parser
+	 * @return string cesta k parseru
 	 */
 	public function getParser() {
 		return $this->parser;
 	}
 
 	/**
-	 * @return mixed
+	 * Getter pro ziskani tridni promenne $interpret
+	 * @return string cesta k interpretu
 	 */
 	public function getInterpret() {
 		return $this->interpret;
@@ -585,7 +818,7 @@ class HtmlGenerator extends Singleton {
 
 
 	/**
-	 *
+	 * Getter pro navraceni tridni promenne obsahujici pole testu
 	 * @return Test[]
 	 */
 	public function getTestArray() {
@@ -593,14 +826,19 @@ class HtmlGenerator extends Singleton {
 	}
 
 	/**
-	 * @param mixed $testArray
+	 * Setter pro nastaveni tridni promenne pole testu
+	 * @param Test[] $testArray
 	 */
 	public function setTestArray($testArray) {
 		$this->testArray = $testArray;
 	}
 
 
-
+	/*
+	 * Funkce generuje vystupni HTML zdrojovy kod, ktery je vypsan na standardni vystup. Pokud je $stylised true, dojde ke stylizaci textu, jinak dojde k plain html vypisu
+	 *
+	 * @param bool $stylised Znacka urcujici zda dojde ke stylizaci HTML nebo ne
+	 */
 	public function generateHtml($stylised) {
 		if (!$stylised) {
 			$styles = "";
@@ -617,13 +855,13 @@ class HtmlGenerator extends Singleton {
 			.right {text-align: right;}
 			
 			html {
-			background-color: #111;
-			color: #0074D9;
+				background-color: #111;
+				color: #0074D9;
 			}
 			
 			tr {
-			border-width: 1px;
-			border-color: black;
+				border-width: 1px;
+				border-color: black;
 			}
 			</style>";
 		}
