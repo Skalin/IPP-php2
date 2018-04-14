@@ -659,7 +659,7 @@ class TestBehavior extends Singleton {
 
 			$returnVal = 0;
 			if ($this->programExists($this->getParser())) {
-				exec('php -f '.$this->getParser().' < '.$test->getName().".src", $output, $returnVal);
+				exec('php5.6 -f '.$this->getParser().' < '.$test->getName().".src", $output, $returnVal);
 			} else {
 				$this->throwException(11, "Parser does not exist", true);
 			}
@@ -675,7 +675,7 @@ class TestBehavior extends Singleton {
 			$xml = implode($output, "\n");
 
 			if ($this->programExists($this->getInterpret())) {
-				exec('python3 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
+				exec('python3.6 '.$this->getInterpret().' < '.$test->getName().".in", $output, $returnVal);
 			} else {
 				$this->throwException(11, "Interpret does not exist", true);
 			}
@@ -776,20 +776,30 @@ class HtmlGenerator extends Singleton {
 	 * var Test[] $testArray
 	 */
 	private $testArray;
+
+	/*
+	 * @var string Cesta kde jsou ulozeny testy
+	 */
 	private $directory;
+
+	/*
+	 * @var string Cesta k lexikalnimu analyzatoru
+	 */
 	private $parser;
+
+	/*
+	 * @var string Cesta k interpretu jazyka IPPcode18
+	 */
 	private $interpret;
-	private $arguments;
 
 	/*
 	 * Konstruktor tridy HtmlGenerator
 	 */
-	public function __construct($testArray, $directory, $parser, $interpret, $arguments) {
+	public function __construct($testArray, $directory, $parser, $interpret) {
 		$this->testArray = $testArray;
 		$this->directory = $directory;
 		$this->parser = $parser;
 		$this->interpret = $interpret;
-		$this->arguments = $arguments;
 	}
 
 	/**
