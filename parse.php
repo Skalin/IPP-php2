@@ -373,7 +373,7 @@ class Lex extends Singleton {
 	}
 
 	/**
-	 * @param integer Pocet radku obsahujici komentar
+	 * @param integer $comments Pocet radku obsahujici komentar
 	 */
 	private function setAmountOfComments($comments) {
 		$this->comments = $comments;
